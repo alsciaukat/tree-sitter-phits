@@ -1,5 +1,20 @@
 [
   {
+    "type": "assignment_start",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "binary_expression",
     "named": true,
     "fields": {},
@@ -43,10 +58,6 @@
         },
         {
           "type": "material_section",
-          "named": true
-        },
-        {
-          "type": "section",
           "named": true
         },
         {
@@ -142,7 +153,7 @@
       "required": true,
       "types": [
         {
-          "type": "identifier",
+          "type": "assignment_start",
           "named": true
         },
         {
@@ -181,7 +192,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "c_comment",
@@ -252,6 +263,25 @@
     }
   },
   {
+    "type": "continued_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "comment_inline",
+          "named": true
+        },
+        {
+          "type": "math_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "expression",
     "named": true,
     "fields": {},
@@ -290,6 +320,29 @@
     }
   },
   {
+    "type": "extended_parameter_definition_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "continued_statement",
+          "named": true
+        },
+        {
+          "type": "extended_parameter_definition_statement",
+          "named": true
+        },
+        {
+          "type": "parameter_definition_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "identifier",
     "named": true,
     "fields": {},
@@ -305,73 +358,9 @@
     }
   },
   {
-    "type": "insert_file_statement",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "filename",
-          "named": true
-        },
-        {
-          "type": "line_numbers",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "integer",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "positive_integer",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "line",
     "named": true,
     "fields": {}
-  },
-  {
-    "type": "line_number",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "positive_integer",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "line_numbers",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "line_number",
-          "named": true
-        }
-      ]
-    }
   },
   {
     "type": "material_definition",
@@ -516,7 +505,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "material_definition",
@@ -577,6 +566,10 @@
           "named": true
         },
         {
+          "type": "positive_integer",
+          "named": true
+        },
+        {
           "type": "unary_expression",
           "named": true
         }
@@ -588,13 +581,9 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": false,
       "types": [
-        {
-          "type": "integer",
-          "named": true
-        },
         {
           "type": "positive_integer",
           "named": true
@@ -611,11 +600,26 @@
       "required": true,
       "types": [
         {
-          "type": "expressions",
+          "type": "assignment_start",
           "named": true
         },
         {
-          "type": "identifier",
+          "type": "expressions",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "parameter_definition_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "parameter_definition",
           "named": true
         }
       ]
@@ -691,67 +695,6 @@
     "fields": {}
   },
   {
-    "type": "section",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "section_body",
-          "named": true
-        },
-        {
-          "type": "section_header",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "section_body",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "comment_line",
-          "named": true
-        },
-        {
-          "type": "statement",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "section_header",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "comment_inline",
-          "named": true
-        },
-        {
-          "type": "section_name",
-          "named": true
-        },
-        {
-          "type": "section_option",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "section_option",
     "named": true,
     "fields": {},
@@ -814,7 +757,15 @@
       "required": true,
       "types": [
         {
-          "type": "statement",
+          "type": "comment_line",
+          "named": true
+        },
+        {
+          "type": "extended_parameter_definition_statement",
+          "named": true
+        },
+        {
+          "type": "parameter_definition_statement",
           "named": true
         }
       ]
@@ -834,56 +785,6 @@
         },
         {
           "type": "section_option",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "statement",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "insert_file_statement",
-          "named": true
-        },
-        {
-          "type": "parameter_definition",
-          "named": true
-        },
-        {
-          "type": "skip_section_statement",
-          "named": true
-        },
-        {
-          "type": "statement_end",
-          "named": true
-        },
-        {
-          "type": "termination_statement",
-          "named": true
-        },
-        {
-          "type": "user_definition",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "statement_end",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": false,
-      "types": [
-        {
-          "type": "comment_inline",
           "named": true
         }
       ]
@@ -971,7 +872,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "c_comment",
@@ -1029,7 +930,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "comment_line",
@@ -1120,25 +1021,6 @@
     }
   },
   {
-    "type": "user_definition",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "math_expression",
-          "named": true
-        },
-        {
-          "type": "positive_integer",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "\n",
     "named": false
   },
@@ -1175,19 +1057,11 @@
     "named": false
   },
   {
-    "type": ".",
-    "named": false
-  },
-  {
     "type": "/",
     "named": false
   },
   {
     "type": ":",
-    "named": false
-  },
-  {
-    "type": ";",
     "named": false
   },
   {
@@ -1224,16 +1098,12 @@
     "named": true
   },
   {
-    "type": "filename",
-    "named": true
-  },
-  {
     "type": "hash_comment",
     "named": true
   },
   {
-    "type": "infl:",
-    "named": false
+    "type": "integer",
+    "named": true
   },
   {
     "type": "newline_escape",
@@ -1248,31 +1118,7 @@
     "named": true
   },
   {
-    "type": "section_name",
-    "named": true
-  },
-  {
-    "type": "set:",
-    "named": false
-  },
-  {
-    "type": "skip_section_statement",
-    "named": true
-  },
-  {
     "type": "string",
     "named": true
-  },
-  {
-    "type": "termination_statement",
-    "named": true
-  },
-  {
-    "type": "{",
-    "named": false
-  },
-  {
-    "type": "}",
-    "named": false
   }
 ]

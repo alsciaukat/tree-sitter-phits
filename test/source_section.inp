@@ -1,0 +1,12 @@
+[Source]
+s-type  =  1           $ Proton source
+proj    =  proton         $ Projectile
+
+e0 = 1
+e-type  = 1
+ne      = 3
+            0  0.2
+			2  0.6
+			4  0.2
+			6
+dir     =   1.0           $ Direction along Z-axis
