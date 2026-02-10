@@ -1,0 +1,76 @@
+[Title]
+Dose calculation for 1 MeV Proton on LiF Crystal
+New line in the title?
+
+[Parameters]
+icntl    =           0     $ 0: Normal simulation
+maxcas   =        100.0     $ Number of histories per batch
+maxbch   =        10     $ Number of batches
+e-mode   = 1
+negs     = 1
+
+[Source]
+s-type  =  1           $ Proton source
+proj    =  proton         $ Projectile
+
+# e0 = 1
+e-type  = 1
+ne      = 3
+            0  0.2
+			2  0.6
+			4  0.2
+			6
+dir     =   1.0           $ Direction along Z-axis
+x0      =   0.0           $ Beam center X
+y0      =   0.0           $ Beam center Y
+z0      =  -0.2           $ Starting position (1mm back from surface)
+z1      =  -0.1
+r0      =   0.1           $ Beam radius (1mm)
+
+[Material]
+MAT[1]    Li  1.0  F  1.0   $ LiF Crystal
+MAT[2]    H   2.0  O  1.0
+
+[Surface]
+11  pz      0.0            $ Front face of crystal
+12  pz      10.0            $ Back face of crystal (1mm thick)
+13  px     -10.0           $ Left face
+14  px      10.0           $ Right face
+15  py     -10.0           $ Bottom face
+16  py      10.0           $ Top face
+99  so     100.0           $ Outer boundary
+
+[Cell]
+100    2 -2.635  11 -12 13 -14 15 -16  $ LiF Cube (1mm x 1mm x 1mm)
+110    0         -99 #100              $ Void space
+120   -1          99                   $ Outer vacuum
+
+[T-Deposit]
+# mesh = reg
+# reg  = 100
+
+mesh =  xyz            # mesh type is xyz scoring mesh
+x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+xmin =  -1.00000      # minimum value of x-mesh points
+xmax =   1.00000      # maximum value of x-mesh points
+nx =  100            # number of x-mesh points
+y-type =    1            # y-mesh is given by the below data
+ny =    1            # number of y-mesh points
+      -5.0  5.0
+z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+zmin =  -1.00000      # minimum value of z-mesh points
+zmax =   2.00000      # maximum value of z-mesh points
+nz =  200            # number of z-mesh points
+
+part = all
+material = 1
+           2
+output = deposit
+e-type = 3
+ne = 1
+emin = 1e-3
+emax = 6
+axis = xz
+unit = 3
+file = lif.out
+epsout = 1

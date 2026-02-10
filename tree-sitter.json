@@ -1,0 +1,40 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "phits",
+      "camelcase": "Phits",
+      "title": "Phits",
+      "scope": "source.phits",
+      "file-types": [
+        "inp"
+      ],
+      "injection-regex": "^phits$",
+      "class-name": "TreeSitterPhits"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Parser for the input file of Particle and Heavy Ion Transport code System (PHITS)",
+    "authors": [
+      {
+        "name": "Jeemin Kim",
+        "email": "alsciokat@gmail.com",
+        "url": "https://alsciokat.com/"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tree-sitter/tree-sitter-phits"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}
