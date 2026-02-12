@@ -1,6 +1,13 @@
-function test () {
-	tree-sitter generate	
-	tree-sitter parse -d pretty ./test/$1.inp \
-				> ./test/$1.out \
-				2> >(sed -r 's/\x1B\[[0-9;]*[mK]//g' > ./test/$1.debug)
+function parse () {
+	tree-sitter generate || return
+    curtime=$(date)
+	echo $curtime
+	echo $curtime > ./test/$1.out
+	echo $curtime > ./test/$1.debug
+	tree-sitter parse -d normal ./test/$1.inp \
+				>> ./test/$1.out \
+				2>> ./test/$1.debug
+	return 0
 }
+
+parse $1
