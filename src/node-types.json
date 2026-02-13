@@ -143,7 +143,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "c_comment",
@@ -165,7 +165,7 @@
       "required": false,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -176,26 +176,7 @@
     }
   },
   {
-    "type": "comment_inline",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "exclamation_comment",
-          "named": true
-        },
-        {
-          "type": "hash_comment",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "comment_line",
+    "type": "comment",
     "named": true,
     "fields": {},
     "children": {
@@ -218,6 +199,25 @@
     }
   },
   {
+    "type": "continued_material_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "element_definition",
+          "named": true
+        },
+        {
+          "type": "inline_comment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "continued_statement",
     "named": true,
     "fields": {},
@@ -226,7 +226,7 @@
       "required": true,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -237,13 +237,36 @@
     }
   },
   {
+    "type": "element_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "element",
+          "named": true
+        },
+        {
+          "type": "ratio",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "expression",
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "index",
+          "named": true
+        },
         {
           "type": "math_expression",
           "named": true
@@ -275,6 +298,29 @@
     }
   },
   {
+    "type": "extended_material_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "continued_material_definition",
+          "named": true
+        },
+        {
+          "type": "extended_material_definition",
+          "named": true
+        },
+        {
+          "type": "material_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "extended_parameter_definition",
     "named": true,
     "fields": {},
@@ -298,6 +344,11 @@
     }
   },
   {
+    "type": "float",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "identifier",
     "named": true,
     "fields": {},
@@ -313,6 +364,25 @@
     }
   },
   {
+    "type": "inline_comment",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "exclamation_comment",
+          "named": true
+        },
+        {
+          "type": "hash_comment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "insert_file_statement",
     "named": true,
     "fields": {},
@@ -321,11 +391,11 @@
       "required": true,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "filename",
           "named": true
         },
         {
-          "type": "filename",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -374,38 +444,11 @@
       "required": true,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "element_definition",
           "named": true
         },
         {
-          "type": "element",
-          "named": true
-        },
-        {
-          "type": "material_name",
-          "named": true
-        },
-        {
-          "type": "ratio",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "material_definition_reverse",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "comment_inline",
-          "named": true
-        },
-        {
-          "type": "element",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -413,11 +456,7 @@
           "named": true
         },
         {
-          "type": "material_number",
-          "named": true
-        },
-        {
-          "type": "ratio",
+          "type": "material_name",
           "named": true
         }
       ]
@@ -459,7 +498,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "index",
@@ -508,14 +547,34 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
+        {
+          "type": "continued_material_definition",
+          "named": true
+        },
+        {
+          "type": "extended_material_definition",
+          "named": true
+        },
+        {
+          "type": "inline_comment",
+          "named": true
+        },
         {
           "type": "material_definition",
           "named": true
         },
         {
-          "type": "material_definition_reverse",
+          "type": "reverse_continued_material_definition",
+          "named": true
+        },
+        {
+          "type": "reverse_extended_material_definition",
+          "named": true
+        },
+        {
+          "type": "reverse_material_definition",
           "named": true
         },
         {
@@ -534,7 +593,7 @@
       "required": false,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -554,10 +613,6 @@
       "types": [
         {
           "type": "binary_expression",
-          "named": true
-        },
-        {
-          "type": "integer",
           "named": true
         },
         {
@@ -596,10 +651,18 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": false,
+      "required": true,
       "types": [
         {
+          "type": "float",
+          "named": true
+        },
+        {
           "type": "index",
+          "named": true
+        },
+        {
+          "type": "integer",
           "named": true
         }
       ]
@@ -629,15 +692,15 @@
       "required": true,
       "types": [
         {
-          "type": "comment_inline",
-          "named": true
-        },
-        {
           "type": "expressions",
           "named": true
         },
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "inline_comment",
           "named": true
         }
       ]
@@ -682,7 +745,7 @@
       "required": true,
       "types": [
         {
-          "type": "comment_line",
+          "type": "comment",
           "named": true
         },
         {
@@ -702,6 +765,94 @@
       "types": [
         {
           "type": "number",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "reverse_continued_material_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "inline_comment",
+          "named": true
+        },
+        {
+          "type": "reverse_element_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "reverse_element_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "element",
+          "named": true
+        },
+        {
+          "type": "ratio",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "reverse_extended_material_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "reverse_continued_material_definition",
+          "named": true
+        },
+        {
+          "type": "reverse_extended_material_definition",
+          "named": true
+        },
+        {
+          "type": "reverse_material_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "reverse_material_definition",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "element_definition",
+          "named": true
+        },
+        {
+          "type": "inline_comment",
+          "named": true
+        },
+        {
+          "type": "material_id",
+          "named": true
+        },
+        {
+          "type": "material_name",
           "named": true
         }
       ]
@@ -740,7 +891,7 @@
       "required": true,
       "types": [
         {
-          "type": "comment_line",
+          "type": "comment",
           "named": true
         },
         {
@@ -783,7 +934,7 @@
       "required": true,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -821,7 +972,7 @@
       "required": false,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         }
       ]
@@ -856,7 +1007,7 @@
       "required": true,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -945,7 +1096,7 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "c_comment",
@@ -967,7 +1118,7 @@
       "required": false,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -1001,7 +1152,7 @@
       "required": false,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         }
       ]
@@ -1040,7 +1191,7 @@
       "required": false,
       "types": [
         {
-          "type": "comment_line",
+          "type": "comment",
           "named": true
         },
         {
@@ -1059,7 +1210,7 @@
       "required": false,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "inline_comment",
           "named": true
         },
         {
@@ -1136,11 +1287,11 @@
       "required": true,
       "types": [
         {
-          "type": "comment_inline",
+          "type": "index",
           "named": true
         },
         {
-          "type": "index",
+          "type": "inline_comment",
           "named": true
         },
         {

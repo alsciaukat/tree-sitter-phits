@@ -1,0 +1,109 @@
+# -*- mode: phits-ts; -*-
+
+[ title ]
+ sample input for batch source
+
+[ parameters ]
+ icntl    = 0
+ maxcas   = 1E5
+ maxbch   = 6
+ itall = 4
+
+file(6)  = phits.out
+
+[ source ]
+  totfact = 1
+  <source> =  1
+   s-type =   1
+     proj =  proton
+       y0 =   0
+       y1 =   0
+       z0 =  -1
+       z1 =  -1
+       e0 =  200
+     ibatch = 1 {4-6}
+      dir =   1
+      
+  <source> =   1
+   s-type =   1
+     proj =  proton
+       y0 =   5
+       y1 =   5
+       z0 =  -1
+       z1 =  -1
+       e0 =  200
+    ibatch =  2 4 6
+      dir =   1
+      
+  <source> =  1
+   s-type =   1
+     proj =  proton
+       y0 =  -5
+       y1 =  -5
+       z0 =  -1
+       z1 =  -1
+       e0 =  200
+    ibatch = 3 5 6
+      dir =   1
+
+[ material ]
+  m1
+  H 2
+  O 1
+ 
+[ surface ]
+  10  cz  10
+  11  pz  0 
+  12  pz  10
+  99  so  100
+
+[ cell ]
+  1  1 -1.0 -10  11 -12
+ 99  0   -99  #1
+100 -1    99
+
+[ mat name color ]
+ mat  name            color
+   0  Void            lightgray
+   1  water           pastelblue
+
+[ t-track ]
+     mesh =   xyz
+   x-type =    2
+       nx =    1
+     xmin =   -5
+     xmax =    5
+   y-type =    2
+       ny =   50
+     ymin =  -15.
+     ymax =   15.
+   z-type =    2
+       nz =   50
+     zmin =   -5
+     zmax =   15
+   e-type =    2
+       ne =    1
+     emin =   0.0 
+     emax =  250
+     unit =    1
+     axis =   yz
+     file = track_yz.out
+     part =   all      
+    resol =    2
+    gshow =    1
+   epsout =    1
+
+[ t-track ]
+     mesh =   reg
+      reg =   1 99
+   e-type =    2
+       ne =    1
+     emin =   0.0
+     emax =   250
+     unit =    1
+     axis =   reg
+     file = track_reg.out
+     part =   neutron
+   epsout =    0
+   
+

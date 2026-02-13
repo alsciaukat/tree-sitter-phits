@@ -1,3 +1,5 @@
+#!/bin/sh
+
 function parse () {
 	tree-sitter generate || return
     curtime=$(date)
@@ -10,4 +12,7 @@ function parse () {
 	return 0
 }
 
-parse $1
+function build () {
+	tree-sitter generate
+	tree-sitter build -o ~/.emacs.d/tree-sitter/libtree-sitter-phits.so 
+}

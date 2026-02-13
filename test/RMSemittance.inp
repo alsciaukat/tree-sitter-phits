@@ -1,0 +1,72 @@
+# -*- mode: phits-ts -*-
+
+[ T i t l e ]
+Sample input file for generating accelerator source based on RMS emittance with wem = 0
+The parameter setting is arbitrary
+
+[ P a r a m e t e r s ]
+ icntl    =           0     # (D=0) 3:ECH 5:NOR 6:SRC 7,8:GSH 11:DSH 12:DUMP
+ maxcas   =        100000     # (D=10) number of particles per one batch
+ maxbch   =           1     # (D=10) number of batches
+
+[ S o u r c e ]
+  totfact = 1.0             # You have to input your AmBe source intensity (neutron/s) here
+   s-type =  11             # ellipsoid source
+     proj =  proton         # kind of incident particle         
+       e0 =  100.0000       # energy of beam [MeV/n]
+       x0 =   0.0000        # (D=0.0) center of x-axis [cm]
+       y0 =   0.0000        # (D=0.0) center of y-axis [cm]
+       z0 =  -4.0000        # minimum position of z-axis [cm]
+       z1 =  -4.0000        # maximum position of z-axis [cm]
+       rx =  -0.50000        # phase space angle of x-axis [rad]
+       ry =   0.50000        # phase space angle of y-axis [rad]
+       x1 =   2.0000        # Mean value of x-corrdinate Gaussian [cm]
+       x2 =   2.0000        # Sigma of x-corrdinate Gaussian [cm]
+   xmrad1 =   1.0000        # Mean value of x-angle Gaussian [mrad]
+   xmrad2 =   5.0000        # Sigma of x-angle Gaussian [mrad]
+       y1 =   1.0000        # Mean value of y-corrdinate Gaussian [cm]
+       y2 =   0.5000        # Sigma of y-corrdinate Gaussian [cm]
+   ymrad1 =   2.00000        # Mean value of y-angle Gaussian [mrad]
+   ymrad2 =   10.00000        # Sigma of y-angle Gaussian [mrad]
+      dir =   1.0000        # z-direction of beam [cosine]
+
+[ M a t e r i a l ]
+MAT[ 1 ]  $ water (not used)
+            H 2.0
+            O 1.0
+
+[ C e l l ]
+ 1   0         -99
+ 99 -1          99
+
+[ S u r f a c e ]
+99  so  100
+
+[ T - T r a c k ]
+    title = Track in xyz mesh
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # y-mesh is linear given by ymin, ymax and ny
+     xmin =  -10            # minimum value of y-mesh points
+     xmax =   10            # maximum value of y-mesh points
+       nx =   100            # number of y-mesh points
+   y-type =    2            # x-mesh is linear given by xmin, xmax and nx
+     ymin =  -10            # minimum value of x-mesh points
+     ymax =   10            # maximum value of x-mesh points
+       ny =   100            # number of x-mesh points
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+     zmin =   0.0           # minimum value of z-mesh points
+     zmax =   10.0          # maximum value of z-mesh points
+       nz =    1            # number of z-mesh points
+   e-type =    1            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+             0.0  1000.0
+     unit =    1            # unit is [1/cm^2/source]
+  2D-type =    3            # 1:Cont, 2:Clust, 3:Color, 4:xyz, 5:mat, 6:Clust+Cont, 7:Col+Cont
+     axis =   xy            # axis of output
+     file = track_xy.out    # file name of output for the above axis
+     part =  all
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL   
+
+[END]
+

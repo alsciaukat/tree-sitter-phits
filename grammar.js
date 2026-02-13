@@ -12,6 +12,7 @@ module.exports = grammar({
   
 	extras: $ => [
 		/\s/,
+		'\r',
 		$.dollar_comment,
 	],
 
@@ -22,7 +23,7 @@ module.exports = grammar({
 		),
 		preamble: $ => repeat1(choice(
 			$.parameter_definition,
-			$.comment_line,
+			$.comment,
 		)),
 		body: $ => repeat1(choice(
 			$.section,
@@ -41,11 +42,11 @@ module.exports = grammar({
 		title_section_header: $ => prec.left(seq(
 			'[', token(/t\s*i\s*t\s*l\s*e/i), ']',
 			optional($.section_option),
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
 		title_section_body: $ => repeat1(choice(
 			$.line,
-			$.comment_line,
+			$.comment,
 			'\n',
 		)),
 		line: $ => token(/[^\[].*/),
@@ -58,42 +59,87 @@ module.exports = grammar({
 		material_section_header: $ => prec.left(seq(
 			'[', /m\s*a\s*t\s*e\s*r\s*i\s*a\s*l/i, ']',
 			optional($.section_option),
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
 		material_section_body: $ => choice(
 			repeat1(choice(
 				$.material_definition,
-				'\n',
+				$.extended_material_definition,
+				$.continued_material_definition,
+				$.inline_comment,
 			)),
 			seq(
 				$.reverse_order_clause,
 				repeat1(choice(
-					$.material_definition_reverse,
-					'\n',
+					$.reverse_material_definition,
+					$.reverse_extended_material_definition,
+					$.reverse_continued_material_definition,
+					$.inline_comment,
 				)),
 			),
 		),
 		reverse_order_clause: $ => seq(/den/i, /nuc/i),
-		material_definition: $ => seq(
+		material_definition: $ => prec.left(seq(
 			$.material_name,
-			repeat1(seq(
-				$.element,
-				$.ratio
-			)),
-			optional($.comment_inline)
-		),
-		material_definition_reverse: $ => prec.right(seq(
-			$.material_number,
 			choice(
-				repeat1(seq($.ratio, $.element)),
-				$.material_id,
+				$.inline_comment,
+				seq(
+					repeat1($.element_definition),
+					optional($.inline_comment),
 				),
-			optional($.comment_inline)
-			)
-		),
-		material_name: $ => choice(seq(/mat/i, '[', $.index, ']'), seq(/m/i, $.index)),
+				seq(
+					$.material_id,
+					optional($.inline_comment),
+				),
+			),
+		)),
+		reverse_material_definition: $ => prec.left(seq(
+			$.material_name,
+			choice(
+				$.inline_comment,
+				seq(
+					repeat1($.element_definition),
+					optional($.inline_comment),
+				),
+				seq(
+					$.material_id,
+					optional($.inline_comment),
+				)
+			),
+		)),
+		extended_material_definition: $ => prec(1, choice(
+			seq(
+				$.material_definition,
+				$.continued_material_definition,
+			),
+			seq(
+				$.extended_material_definition,
+				$.continued_material_definition,
+			),
+		)),
+		reverse_extended_material_definition: $ => prec(1, choice(
+			seq(
+				$.reverse_material_definition,
+				$.reverse_continued_material_definition,
+			),
+			seq(
+				$.reverse_extended_material_definition,
+				$.reverse_continued_material_definition,
+			),
+		)),
+		continued_material_definition: $ => prec.left(seq(
+			repeat1($.element_definition),
+			optional($.inline_comment),
+		)),
+		reverse_continued_material_definition: $ => prec.left(seq(
+			repeat1($.reverse_element_definition),
+			optional($.inline_comment),
+		)),
+		material_name: $ => choice(seq(/mat/i, '[', $.index, ']'), /m\d+/i),
 		material_id: $ => $.string,
-		element: $ => token(/\d*\w+/),
+		element_definition: $ => seq($.element, $.ratio),
+		reverse_element_definition: $ => seq($.ratio, $.element),
+		element: $ => token(/\d*[a-zA-Z]+/),
 		ratio: $ => $.number,
 
 		// surface
@@ -101,19 +147,18 @@ module.exports = grammar({
 		surface_section_header: $ => prec.left(seq(
 			'[', /s\s*u\s*r\s*f\s*a\s*c\s*e/i, ']',
 			optional($.section_option),
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
 		surface_section_body: $ => repeat1(choice(
 			$.surface_definition,
 			$.c_comment,
-			'\n',
 		)),
 		surface_definition: $ => prec.left(seq(
 			$.surface_number,
 			optional($.transform_number),
 			$.surface_symbol,
 			prec.right(repeat1($.math_expression)),
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
 		surface_number: $ => $.index,
 		transform_number: $ => $.index,
@@ -124,12 +169,11 @@ module.exports = grammar({
 		cell_section_header: $ => prec.left(seq(
 			'[', /c\s*e\s*l\s*l/i, ']',
 			optional($.section_option),
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
 		cell_section_body: $ => repeat1(choice(
 			$.cell_definition,
 			$.c_comment,
-			'\n',
 		)),
 		cell_definition: $ => prec(1, seq(
 			$.cell_number,
@@ -144,12 +188,12 @@ module.exports = grammar({
 		material_number: $ => choice('-1', $.index),
 		material_density: $ => $.number,
 
-		surface_expression: $ => choice(
+		surface_expression: $ => prec(1, choice( // conflict with (number integer)
 			$.integer,
 			$.parenthesized_surface_expression,
 			$.not_surface_expression,
 			$.or_surface_expression,
-		),
+		)),
 		parenthesized_surface_expression: $ => prec(4, seq("(", $.surface_expression, ")")),
 		not_surface_expression: $ => prec(3, seq('#', $.surface_expression)),
 		or_surface_expression: $ =>  prec.left(2, seq($.surface_expression, ':', $.surface_expression)),
@@ -168,7 +212,7 @@ module.exports = grammar({
 		section_header: $ => prec.left(seq(
 			'[', $.section_name, ']',
 			optional($.section_option),
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
 		section_option: $ => repeat1($.string),
 		section_body: $ => repeat1(choice(
@@ -179,7 +223,7 @@ module.exports = grammar({
 			$.insert_file_statement,
 			$.skip_section_statement,
 			$.termination_statement,
-			$.comment_line,
+			$.comment,
 		)),
 
 		terminator: $ => seq('[', /end/i, ']'),
@@ -187,14 +231,15 @@ module.exports = grammar({
 
 		continued_statement: $ => prec.right(seq(
 			repeat1($.math_expression),
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
-		parameter_definition: $ => prec.left(seq(
+		parameter_definition: $ => prec.right(seq(
 			$.identifier,
 			'=',
 			$.expressions,
 			optional(';'),
-			optional($.comment_inline),
+			optional($.inline_comment),
+			'\n'
 		)),
 		extended_parameter_definition: $ => prec.left(1, choice(
 			seq(
@@ -210,27 +255,27 @@ module.exports = grammar({
 			'set:',
 			repeat1(seq("c", $.index, "[", $.math_expression, "]")),
 			optional(';'), // TODO: check if semicolon is indeed allowed here.
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
 		insert_file_statement: $ => prec.left(seq(
 			'infl:',
 			'{', $.filename, '}',
 			optional($.line_numbers),
-			optional($.comment_inline),
+			optional($.inline_comment),
 		)),
 		line_numbers: $ => seq('[', optional($.line_number), '-', optional($.line_number), ']'),
 		line_number: $ => $.index,
-		skip_section_statement: $ => prec.left(seq(token('qp:'), optional($.comment_inline))),
-		termination_statement: $ => prec.left(seq(token('q:'), optional($.comment_inline))),
+		skip_section_statement: $ => prec.left(seq(token('qp:'), optional($.inline_comment))),
+		termination_statement: $ => prec.left(seq(token('q:'), optional($.inline_comment))),
 
-        expressions: $ => prec.left(repeat1($.expression)),
+        expressions: $ => prec.right(repeat1($.expression)),
 		expression: $ => choice(
 			$.string,
 			$.math_expression,
+			seq('{', $.index, '-', $.index, '}'),
 			$.newline_escape,
 		),
 		math_expression: $ => choice(
-			$.integer,
 			$.number,
 			prec(3, $.parenthesized_expression),
 			prec(2, $.unary_expression),
@@ -245,22 +290,29 @@ module.exports = grammar({
 			prec.left(1, seq($.math_expression, choice("+", "-"), $.math_expression)),
 		),
 
-		identifier: $ => seq(token(/[$<]?[a-zA-Z][\w-]*[>]?/), optional(seq('(', $.index, ')'))),
+		identifier: $ => choice(
+			seq(/[$<]?[a-zA-Z][\w-]*[>]?/, optional(seq('(', $.index, ')'))),
+			/2d-type/i,
+		),
 		string: $ => token(/[a-zA-Z_][a-zA-Z0-9_\-.]+/),
 		filename: $ => token(/[a-zA-Z0-9-_. ]+/),
-		section_name: $ => token(/[\s\w-]+?/i),
+		section_name: $ => token(/\w[\s\w-]*\w/i),
 		index: $ => token(/\d+/),
 		integer: $ => token(/-?\d+/),
 		number: $ => choice(
+			$.integer,
+			$.float,
+			seq('c', $.index),
+		),
+		float: $ => choice(
 			token(/-?(\d+[.]\d*|[.]\d+)/),
 			token(/-?\d+[.]?\d*e[+-]?\d+/),
 			token('pi'),
-			seq('c', $.index)
 		),
 		newline_escape: $ => token('\\\n'),
 		
-		comment_inline: $ => choice($.hash_comment, $.exclamation_comment),
-		comment_line: $ => choice($.hash_comment, $.exclamation_comment, $.c_comment),
+		inline_comment: $ => choice($.hash_comment, $.exclamation_comment),
+		comment: $ => choice($.hash_comment, $.exclamation_comment, $.c_comment),
 		dollar_comment: $ => token(/[$].*/),
 		hash_comment: $ => token(/[#].*/),
 		exclamation_comment: $ => token(/[!].*/),
