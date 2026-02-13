@@ -1,4 +1,4 @@
-Sat Feb 14 12:10:21 AM KST 2026
+Sat Feb 14 02:43:14 AM KST 2026
 (source_file [0, 0] - [109, 0]
   (preamble [0, 0] - [0, 26]
     (comment [0, 0] - [0, 26]
@@ -8,10 +8,9 @@ Sat Feb 14 12:10:21 AM KST 2026
       (title_section_header [2, 0] - [2, 9])
       (title_section_body [2, 9] - [5, 0]
         (line [2, 9] - [3, 31])))
-    (section [5, 0] - [12, 0]
-      (section_header [5, 0] - [5, 14]
-        (section_name [5, 2] - [5, 12]))
-      (section_body [6, 0] - [12, 0]
+    (parameter_section [5, 0] - [12, 0]
+      (parameter_section_header [5, 0] - [5, 14])
+      (parameter_section_body [6, 0] - [12, 0]
         (parameter_definition [6, 0] - [7, 0]
           (identifier [6, 0] - [6, 6])
           (expressions [6, 12] - [6, 13]
@@ -48,10 +47,9 @@ Sat Feb 14 12:10:21 AM KST 2026
           (expressions [11, 11] - [11, 20]
             (expression [11, 11] - [11, 20]
               (string [11, 11] - [11, 20]))))))
-    (section [13, 0] - [47, 0]
-      (section_header [13, 0] - [13, 10]
-        (section_name [13, 2] - [13, 8]))
-      (section_body [14, 0] - [47, 0]
+    (parameter_section [13, 0] - [47, 0]
+      (parameter_section_header [13, 0] - [13, 10])
+      (parameter_section_body [14, 0] - [47, 0]
         (parameter_definition [14, 0] - [15, 0]
           (identifier [14, 0] - [14, 9])
           (expressions [14, 12] - [14, 13]
@@ -305,32 +303,28 @@ Sat Feb 14 12:10:21 AM KST 2026
         (surface_definition [54, 0] - [54, 12]
           (surface_number [54, 0] - [54, 4]
             (index [54, 0] - [54, 4]))
-          (surface_symbol [54, 4] - [54, 8]
-            (string [54, 4] - [54, 8]))
+          (surface_symbol [54, 6] - [54, 8])
           (math_expression [54, 10] - [54, 12]
             (number [54, 10] - [54, 12]
               (integer [54, 10] - [54, 12]))))
         (surface_definition [55, 0] - [55, 11]
           (surface_number [55, 0] - [55, 4]
             (index [55, 0] - [55, 4]))
-          (surface_symbol [55, 4] - [55, 8]
-            (string [55, 4] - [55, 8]))
+          (surface_symbol [55, 6] - [55, 8])
           (math_expression [55, 10] - [55, 11]
             (number [55, 10] - [55, 11]
               (integer [55, 10] - [55, 11]))))
         (surface_definition [56, 0] - [56, 12]
           (surface_number [56, 0] - [56, 4]
             (index [56, 0] - [56, 4]))
-          (surface_symbol [56, 4] - [56, 8]
-            (string [56, 4] - [56, 8]))
+          (surface_symbol [56, 6] - [56, 8])
           (math_expression [56, 10] - [56, 12]
             (number [56, 10] - [56, 12]
               (integer [56, 10] - [56, 12]))))
         (surface_definition [57, 0] - [57, 13]
           (surface_number [57, 0] - [57, 4]
             (index [57, 0] - [57, 4]))
-          (surface_symbol [57, 4] - [57, 8]
-            (string [57, 4] - [57, 8]))
+          (surface_symbol [57, 6] - [57, 8])
           (math_expression [57, 10] - [57, 13]
             (number [57, 10] - [57, 13]
               (integer [57, 10] - [57, 13]))))))
@@ -340,8 +334,8 @@ Sat Feb 14 12:10:21 AM KST 2026
         (cell_definition [60, 0] - [61, 0]
           (cell_number [60, 0] - [60, 3]
             (index [60, 0] - [60, 3]))
-          (material_number [60, 5] - [60, 6]
-            (index [60, 5] - [60, 6]))
+          (material_number [60, 3] - [60, 6]
+            (index [60, 3] - [60, 6]))
           (material_density [60, 7] - [60, 11]
             (number [60, 7] - [60, 11]
               (float [60, 7] - [60, 11])))
@@ -354,8 +348,8 @@ Sat Feb 14 12:10:21 AM KST 2026
         (cell_definition [61, 0] - [62, 0]
           (cell_number [61, 0] - [61, 3]
             (index [61, 0] - [61, 3]))
-          (material_number [61, 5] - [61, 6]
-            (index [61, 5] - [61, 6]))
+          (material_number [61, 3] - [61, 6]
+            (index [61, 3] - [61, 6]))
           (surface_expression [61, 9] - [61, 12]
             (integer [61, 9] - [61, 12]))
           (surface_expression [61, 14] - [61, 16]
@@ -365,22 +359,19 @@ Sat Feb 14 12:10:21 AM KST 2026
         (cell_definition [62, 0] - [63, 0]
           (cell_number [62, 0] - [62, 3]
             (index [62, 0] - [62, 3]))
-          (material_number [62, 4] - [62, 6])
+          (material_number [62, 3] - [62, 6])
           (surface_expression [62, 10] - [62, 12]
             (integer [62, 10] - [62, 12])))))
-    (section [64, 0] - [64, 18]
-      (section_header [64, 0] - [64, 18]
-        (section_name [64, 2] - [64, 16])))
-    (ERROR [65, 0] - [67, 32]
-      (ERROR [65, 4] - [65, 10])
-      (index [66, 0] - [66, 4])
-      (ERROR [66, 4] - [66, 31])
-      (index [67, 0] - [67, 4])
-      (ERROR [67, 4] - [67, 32]))
-    (section [69, 0] - [94, 0]
-      (section_header [69, 0] - [69, 11]
-        (section_name [69, 2] - [69, 9]))
-      (section_body [70, 0] - [94, 0]
+    (data_section [64, 0] - [69, 0]
+      (data_section_header [64, 0] - [64, 18]
+        (data_section_name [64, 2] - [64, 16]))
+      (data_section_body [64, 18] - [69, 0]
+        (line [64, 18] - [65, 28])
+        (line [65, 28] - [66, 32])
+        (line [66, 32] - [67, 33])))
+    (tally_section [69, 0] - [94, 0]
+      (tally_section_header [69, 0] - [69, 11])
+      (tally_section_body [70, 0] - [94, 0]
         (parameter_definition [70, 0] - [71, 0]
           (identifier [70, 0] - [70, 9])
           (expressions [70, 14] - [70, 17]
@@ -541,10 +532,9 @@ Sat Feb 14 12:10:21 AM KST 2026
               (math_expression [93, 15] - [93, 16]
                 (number [93, 15] - [93, 16]
                   (integer [93, 15] - [93, 16]))))))))
-    (section [95, 0] - [107, 0]
-      (section_header [95, 0] - [95, 11]
-        (section_name [95, 2] - [95, 9]))
-      (section_body [96, 0] - [107, 0]
+    (tally_section [95, 0] - [107, 0]
+      (tally_section_header [95, 0] - [95, 13])
+      (tally_section_body [96, 0] - [107, 0]
         (parameter_definition [96, 0] - [97, 0]
           (identifier [96, 0] - [96, 9])
           (expressions [96, 14] - [96, 17]
@@ -617,7 +607,4 @@ Sat Feb 14 12:10:21 AM KST 2026
             (expression [106, 15] - [106, 16]
               (math_expression [106, 15] - [106, 16]
                 (number [106, 15] - [106, 16]
-                  (integer [106, 15] - [106, 16])))))))))
-  (ERROR [109, 0] - [109, 0]
-    (ERROR [109, 0] - [109, 0])))
-./test/phits.inp	Parse:   14.76 ms	   119 bytes/ms	(ERROR [65, 0] - [67, 32])
+                  (integer [106, 15] - [106, 16]))))))))))

@@ -12,7 +12,6 @@ module.exports = grammar({
   
 	extras: $ => [
 		/\s/,
-		'\r',
 		$.dollar_comment,
 	],
 
@@ -26,11 +25,14 @@ module.exports = grammar({
 			$.comment,
 		)),
 		body: $ => repeat1(choice(
-			$.section,
 			$.title_section,
+			$.parameter_section,
 			$.material_section,
 			$.surface_section,
 			$.cell_section,
+			$.tally_section,
+			$.data_section,
+			$.other_section,
 			$.terminator,
 		)),
 
@@ -51,6 +53,64 @@ module.exports = grammar({
 		)),
 		line: $ => token(/[^\[].*/),
 		
+		// parameter, source
+		parameter_section: $ => seq(
+			$.parameter_section_header,
+			optional($.parameter_section_body)
+		),
+		parameter_section_header: $ => prec.left(seq(
+			'[',
+			choice(
+				/p\s*a\s*r\s*a\s*m\s*e\s*t\s*e\s*r\s*s/i,
+				/s\s*o\s*u\s*r\s*c\s*e/i,
+			),
+			']',
+			optional($.section_option),
+			optional($.inline_comment),
+		)),
+		parameter_section_body: $ => repeat1(choice(
+			$.parameter_definition,
+			$.extended_parameter_definition,
+			$.continued_statement,
+			$.file_definition,
+			$.user_definition,
+			$.insert_file_statement,
+			$.skip_section_statement,
+			$.termination_statement,
+			$.comment,
+		)),
+		file_definition: $ => prec.left(seq(
+			$.file_field, optional(seq('(', $.index, ')')),
+			'=',
+			$.filepath,
+			optional($.inline_comment),
+		)),
+		file_field: $ => token(/file/i),
+
+		// tally
+		tally_section: $ => seq(
+			$.tally_section_header,
+			optional($.tally_section_body)
+		),
+		tally_section_header: $ => prec.left(seq(
+			'[',
+			/t\s*-[\w\s]*\w/i,
+			']',
+			optional($.section_option),
+			optional($.inline_comment),
+		)),
+		tally_section_body: $ => repeat1(choice(
+			$.title_definition,
+			$.parameter_definition,
+			$.extended_parameter_definition,
+			$.continued_statement,
+			$.user_definition,
+			$.insert_file_statement,
+			$.skip_section_statement,
+			$.termination_statement,
+			$.comment,
+		)),
+
 		// material
 		material_section: $ => seq(
 			$.material_section_header,
@@ -66,6 +126,11 @@ module.exports = grammar({
 				$.material_definition,
 				$.extended_material_definition,
 				$.continued_material_definition,
+				$.scattering_definition,
+				$.user_definition,
+				$.insert_file_statement,
+				$.skip_section_statement,
+				$.termination_statement,
 				$.inline_comment,
 			)),
 			seq(
@@ -74,6 +139,10 @@ module.exports = grammar({
 					$.reverse_material_definition,
 					$.reverse_extended_material_definition,
 					$.reverse_continued_material_definition,
+					$.user_definition,
+					$.insert_file_statement,
+					$.skip_section_statement,
+					$.termination_statement,
 					$.inline_comment,
 				)),
 			),
@@ -107,25 +176,13 @@ module.exports = grammar({
 				)
 			),
 		)),
-		extended_material_definition: $ => prec(1, choice(
-			seq(
-				$.material_definition,
-				$.continued_material_definition,
-			),
-			seq(
-				$.extended_material_definition,
-				$.continued_material_definition,
-			),
+		extended_material_definition: $ => prec(1, seq(
+			$.material_definition,
+			repeat1($.continued_material_definition),
 		)),
-		reverse_extended_material_definition: $ => prec(1, choice(
-			seq(
+		reverse_extended_material_definition: $ => prec(1, seq(
 				$.reverse_material_definition,
-				$.reverse_continued_material_definition,
-			),
-			seq(
-				$.reverse_extended_material_definition,
-				$.reverse_continued_material_definition,
-			),
+				repeat1($.reverse_continued_material_definition),
 		)),
 		continued_material_definition: $ => prec.left(seq(
 			repeat1($.element_definition),
@@ -135,7 +192,14 @@ module.exports = grammar({
 			repeat1($.reverse_element_definition),
 			optional($.inline_comment),
 		)),
-		material_name: $ => choice(seq(/mat/i, '[', $.index, ']'), /m\d+/i),
+		material_name: $ => choice(
+			seq(/mat/i, '[', $.index, ']'),
+			/m\d+/i,
+		),
+		scattering_definition: $ => seq(
+			/mt\d+/i,
+			$.material_id,
+		),
 		material_id: $ => $.string,
 		element_definition: $ => seq($.element, $.ratio),
 		reverse_element_definition: $ => seq($.ratio, $.element),
@@ -151,6 +215,10 @@ module.exports = grammar({
 		)),
 		surface_section_body: $ => repeat1(choice(
 			$.surface_definition,
+			$.user_definition,
+			$.insert_file_statement,
+			$.skip_section_statement,
+			$.termination_statement,
 			$.c_comment,
 		)),
 		surface_definition: $ => prec.left(seq(
@@ -162,7 +230,7 @@ module.exports = grammar({
 		)),
 		surface_number: $ => $.index,
 		transform_number: $ => $.index,
-		surface_symbol: $ => $.string,
+		surface_symbol: $ => choice(/[a-zA-Z]+/, /[a-zA-Z]\/[a-zA-Z]/),
 
 		// cell
 		cell_section: $ => seq($.cell_section_header, optional($.cell_section_body)),
@@ -173,6 +241,12 @@ module.exports = grammar({
 		)),
 		cell_section_body: $ => repeat1(choice(
 			$.cell_definition,
+			$.continued_cell_definition,
+			$.extended_cell_definition,
+			$.user_definition,
+			$.insert_file_statement,
+			$.skip_section_statement,
+			$.termination_statement,
 			$.c_comment,
 		)),
 		cell_definition: $ => prec(1, seq(
@@ -183,6 +257,18 @@ module.exports = grammar({
 			optional(seq(/like/i, $.cell_number, /but/i)),
 			optional($.cell_properties),
 			'\n'
+		)),
+		continued_cell_definition: $ => prec.left(seq(
+			/ {6,}/,
+			choice(
+				repeat1($.cell_properties),
+				repeat1($.number)
+			),
+			'\n',
+		)),
+		extended_cell_definition: $ => prec(1, seq(
+			$.cell_definition,
+			repeat1($.continued_cell_definition),
 		)),
 		cell_number: $ => $.index,
 		material_number: $ => choice('-1', $.index),
@@ -198,35 +284,73 @@ module.exports = grammar({
 		not_surface_expression: $ => prec(3, seq('#', $.surface_expression)),
 		or_surface_expression: $ =>  prec.left(2, seq($.surface_expression, ':', $.surface_expression)),
 	 
-		cell_properties: $ => repeat1(choice(
-			seq(/fill/i, '=', repeat1($.universe_lattice_number)),
-			seq($.identifier, '=', $.number),
-		)),
+		cell_properties: $ => prec.right(repeat1(choice(
+			seq($.fill_field, '=', prec.right(repeat1($.universe_lattice_number))),
+			seq($.field, '=', $.number),
+		))),
+		fill_field: $ => token(/fill/i),
 		universe_lattice_number: $ => seq($.index, optional(seq(':', $.universe_lattice_number))),
 
-		// other sections	
-		section: $ => seq(
-			$.section_header,
-			optional($.section_body)
+
+		// other data sections
+		//
+		// do not move these last two section up
+		// it is used to determine the precedence
+		data_section: $ => seq(
+			$.data_section_header,
+			optional($.data_section_body),
 		),
-		section_header: $ => prec.left(seq(
-			'[', $.section_name, ']',
+		data_section_header: $ => prec.left(seq(
+			'[', $.data_section_name, ']',
 			optional($.section_option),
 			optional($.inline_comment),
 		)),
-		section_option: $ => repeat1($.string),
-		section_body: $ => repeat1(choice(
-			$.parameter_definition,
-			$.extended_parameter_definition,
-			$.continued_statement,
-			$.user_definition,
-			$.insert_file_statement,
-			$.skip_section_statement,
-			$.termination_statement,
+		data_section_body: $ => repeat1(choice(
+			$.line, // TODO: implement this
 			$.comment,
+			'\n',
+		)),
+		data_section_name: $ => choice(
+			/t\s*r\s*a\s*n\s*s\s*f\s*o\s*r\s*m/i,
+			/t\s*e\s*m\s*p\s*e\s*r\s*a\s*t\s*u\s*r\s*e/i,
+			/m\s*a\s*t\s*t\s*i\s*m\s*e\s*c\s*h\s*a\s*n\s*g\s*e/i,
+			/m\s*a\s*g\s*n\s*e\s*t\s*i\s*c\s*f\s*i\s*e\s*l\s*d/i,
+			/e\s*l\s*e\s*c\s*t\s*r\s*o\s*m\s*a\s*g\s*n\s*e\s*t\s*i\s*c\s*f\s*i\s*e\s*l\s*d/i,
+			/d\s*e\s*l\s*t\s*a\s*r\s*a\s*y/i,
+			/t\s*r\s*a\s*c\s*k\s*s\s*t\s*r\s*u\s*c\s*t\s*u\s*r\s*e/i,
+			/s\s*u\s*p\s*e\s*r\s*m\s*i\s*r\s*r\s*o\s*r/i,
+			/e\s*l\s*a\s*s\s*t\s*i\s*c\s*o\s*p\s*t\s*i\s*o\s*n/i,
+			/f\s*r\s*a\s*g\s*d\s*a\s*t\s*a/i,
+			/v\s*o\s*l\s*u\s*m\s*e/i,
+			/m\s*a\s*t\s*n\s*a\s*m\s*e\s*c\s*o\s*l\s*o\s*r/i,
+			/r\s*e\s*g\s*n\s*a\s*m\s*e/i,
+			/t\s*i\s*m\s*e\s*r/i,
+			/u\s*s\s*e\s*r\s*d\s*e\s*f\s*i\s*n\s*e\s*d\s*p\s*a\s*r\s*t\s*i\s*c\s*l\s*e/i,
+			/u\s*s\s*e\s*r\s*d\s*e\s*f\s*i\s*n\s*e\s*d\s*p\s*a\s*r\s*t\s*i\s*c\s*l\s*e/i
+		),
+
+		// other configuration sections
+		// they contain both parameter_definition and data_line
+		//
+		// TODO: They need to be implemented
+		// Delta Max, Importance, Weight Window, WW Bias
+		// Forced Collisions, Repeated Collisions, Multiplier, Counter
+		other_section: $ => seq(
+			$.other_section_header,
+			optional($.other_section_body),
+		),
+		other_section_header: $ => prec.left(seq(
+			'[', /\w[\s\w]*\w/i, ']',
+			optional($.section_option),
+			optional($.inline_comment),
+		)),
+		other_section_body: $ => repeat1(choice(
+			$.line,
+			$.comment,
+			'\n',
 		)),
 
-		terminator: $ => seq('[', /end/i, ']'),
+		terminator: $ => seq('[', /e\s*n\s*d/i, ']'),
 
 
 		continued_statement: $ => prec.right(seq(
@@ -234,23 +358,23 @@ module.exports = grammar({
 			optional($.inline_comment),
 		)),
 		parameter_definition: $ => prec.right(seq(
-			$.identifier,
+			$.field,
 			'=',
 			$.expressions,
 			optional(';'),
 			optional($.inline_comment),
 			'\n'
 		)),
-		extended_parameter_definition: $ => prec.left(1, choice(
-			seq(
-				$.parameter_definition,
-				$.continued_statement,
-			),
-			seq(
-				$.extended_parameter_definition,
-				$.continued_statement,
-			),
+		extended_parameter_definition: $ => prec.left(1, seq(
+			$.parameter_definition,
+			repeat1($.continued_statement),
 		)),
+		title_definition: $ => seq(
+			$.title_field,
+			'=',
+			$.title_string,
+		),
+		title_field: $ => token(/title/i),
 		user_definition: $ => prec.left(seq(
 			'set:',
 			repeat1(seq("c", $.index, "[", $.math_expression, "]")),
@@ -259,7 +383,7 @@ module.exports = grammar({
 		)),
 		insert_file_statement: $ => prec.left(seq(
 			'infl:',
-			'{', $.filename, '}',
+			'{', $.filepath, '}',
 			optional($.line_numbers),
 			optional($.inline_comment),
 		)),
@@ -290,23 +414,25 @@ module.exports = grammar({
 			prec.left(1, seq($.math_expression, choice("+", "-"), $.math_expression)),
 		),
 
+		field: $ => seq($.identifier, optional(seq('(', $.index, ')'))),
 		identifier: $ => choice(
-			seq(/[$<]?[a-zA-Z][\w-]*[>]?/, optional(seq('(', $.index, ')'))),
+			token(/[$<]?[a-zA-Z][\w-]*[>]?/),
 			/2d-type/i,
 		),
-		string: $ => token(/[a-zA-Z_][a-zA-Z0-9_\-.]+/),
-		filename: $ => token(/[a-zA-Z0-9-_. ]+/),
-		section_name: $ => token(/\w[\s\w-]*\w/i),
+		string: $ => token(/[a-zA-Z_][a-zA-Z0-9_\-.]*/),
+		title_string: $ => token(/.*/),
+		filepath: $ => token(/[a-zA-Z0-9-_./]+/),
+		section_option: $ => repeat1($.string),
 		index: $ => token(/\d+/),
 		integer: $ => token(/-?\d+/),
 		number: $ => choice(
 			$.integer,
 			$.float,
-			seq('c', $.index),
+			/c\d+/i,
 		),
 		float: $ => choice(
 			token(/-?(\d+[.]\d*|[.]\d+)/),
-			token(/-?\d+[.]?\d*e[+-]?\d+/),
+			token(/-?\d+[.]?\d*(e|E)[+-]?\d+/),
 			token('pi'),
 		),
 		newline_escape: $ => token('\\\n'),
@@ -316,8 +442,6 @@ module.exports = grammar({
 		dollar_comment: $ => token(/[$].*/),
 		hash_comment: $ => token(/[#].*/),
 		exclamation_comment: $ => token(/[!].*/),
-		c_comment: $ => token(/ {0,4}c .*/),
-		
-
+		c_comment: $ => token(/ {0,4}c\s.*/),
 	}
 });

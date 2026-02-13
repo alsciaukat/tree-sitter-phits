@@ -93,7 +93,7 @@ file(6)  = phits.out
     gshow =    1
    epsout =    1
 
-[ t-track ]
+[ T - Gshow ]
      mesh =   reg
       reg =   1 99
    e-type =    2
@@ -105,5 +105,5 @@ file(6)  = phits.out
      file = track_reg.out
      part =   neutron
    epsout =    0
-   
+
 
