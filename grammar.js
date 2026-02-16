@@ -222,15 +222,12 @@ module.exports = grammar({
 			$.c_comment,
 		)),
 		surface_definition: $ => prec.left(seq(
-			$.surface_number,
-			optional($.transform_number),
-			$.surface_symbol,
+			field("surface_number", $.index),
+			field("transform_number", optional($.index)),
+			field("surface_symbol", choice(/[a-zA-Z]+/, /[a-zA-Z]\/[a-zA-Z]/)),
 			prec.right(repeat1($.math_expression)),
 			optional($.inline_comment),
 		)),
-		surface_number: $ => $.index,
-		transform_number: $ => $.index,
-		surface_symbol: $ => choice(/[a-zA-Z]+/, /[a-zA-Z]\/[a-zA-Z]/),
 
 		// cell
 		cell_section: $ => seq($.cell_section_header, optional($.cell_section_body)),
@@ -250,11 +247,11 @@ module.exports = grammar({
 			$.c_comment,
 		)),
 		cell_definition: $ => prec(1, seq(
-			$.cell_number,
-			$.material_number,
-			optional($.material_density),
+			field("cell_number", $.index),
+			field("material_number", choice('-1', '0', $.index)),
+			field("material_density", optional($.number)),
 			repeat1($.surface_expression),
-			optional(seq(/like/i, $.cell_number, /but/i)),
+			optional(seq(/like/i, field("like_cell_number", $.index), /but/i)),
 			optional($.cell_properties),
 			'\n'
 		)),
@@ -270,9 +267,6 @@ module.exports = grammar({
 			$.cell_definition,
 			repeat1($.continued_cell_definition),
 		)),
-		cell_number: $ => $.index,
-		material_number: $ => choice('-1', $.index),
-		material_density: $ => $.number,
 
 		surface_expression: $ => prec(1, choice( // conflict with (number integer)
 			$.integer,
@@ -376,21 +370,25 @@ module.exports = grammar({
 		),
 		title_field: $ => token(/title/i),
 		user_definition: $ => prec.left(seq(
-			'set:',
+			$.user_definition_directive,
 			repeat1(seq("c", $.index, "[", $.math_expression, "]")),
 			optional(';'), // TODO: check if semicolon is indeed allowed here.
 			optional($.inline_comment),
 		)),
+		user_definition_directive: $ => token('set:'),
 		insert_file_statement: $ => prec.left(seq(
-			'infl:',
+			$.insert_file_statement_directive,
 			'{', $.filepath, '}',
 			optional($.line_numbers),
 			optional($.inline_comment),
 		)),
+		insert_file_statement_directive: $ => token('infl:'),
 		line_numbers: $ => seq('[', optional($.line_number), '-', optional($.line_number), ']'),
 		line_number: $ => $.index,
-		skip_section_statement: $ => prec.left(seq(token('qp:'), optional($.inline_comment))),
-		termination_statement: $ => prec.left(seq(token('q:'), optional($.inline_comment))),
+		skip_section_statement: $ => prec.left(seq($.skip_section_statement_directive, optional($.inline_comment))),
+		skip_section_statement_directive: $ => token('qp:'),
+		termination_statement: $ => prec.left(seq($.termination_statement_directive, optional($.inline_comment))),
+		termination_statement_directive: $ => token('q:'),
 
         expressions: $ => prec.right(repeat1($.expression)),
 		expression: $ => choice(
@@ -442,6 +440,6 @@ module.exports = grammar({
 		dollar_comment: $ => token(/[$].*/),
 		hash_comment: $ => token(/[#].*/),
 		exclamation_comment: $ => token(/[!].*/),
-		c_comment: $ => token(/ {0,4}c\s.*/),
+		c_comment: $ => token(/ {0,4}c([ \t].*|\n)/),
 	}
 });
