@@ -60,6 +60,76 @@ Distinct sub-grammars worth knowing:
 - **Parameter / tally** bodies: `field = expressions` statements, with `extended_parameter_definition` = a definition plus `continued_statement` follow-on lines (e.g. `[T-Dchain]` `timeevo`/`outtime` rows carrying a `time_unit`).
 - Directives usable in most bodies: `infl:` (insert file), `set:` (user-defined constants), `qp:` (skip), `q:` (terminate). `[end]` is the file `terminator`.
 
+### Rule reference
+
+Detailed map of the rules in `grammar.js`. **Field names and node names are a contract** (`phits.el` and any queries consume them) — this section is the authoritative list; keep it in sync when you change `grammar.js`.
+
+**Top level**
+
+- `source_file` → optional `preamble` + optional `body`.
+- `preamble` → `repeat1(parameter_definition | comment)`, plus an optional trailing `_parameter_statement` aliased to `parameter_definition` (EOF-without-newline handling; see below). This is the region before the first `[section]`.
+- `body` → `repeat1` of the section choices **in this fixed order**: `title_section`, `parameter_section`, `material_section`, `surface_section`, `cell_section`, `tally_section`, `data_section`, `other_section`, `terminator`. Order = precedence; `data_section`/`other_section` are broad and must stay last.
+
+**Common header shape**: `'[' <name-regex> ']'` + optional `section_option` + optional `inline_comment`. `section_option` is `repeat1(string)`. The **material header additionally ends with an explicit `'\n'`** (stops `section_option` from swallowing the first `m<N>` material line as a string).
+
+**Sections** — each `X_section` = `X_section_header` + optional `X_section_body`:
+
+| Section | Header regex | Body statement kinds |
+|---|---|---|
+| `title_section` | `[title]` | `line` \| `comment` \| `'\n'` |
+| `parameter_section` | `[parameters]` or `[source]` | `parameter_definition`, `extended_parameter_definition`, `continued_statement`, `file_definition`, `user_definition`, `insert_file_statement`, `skip_section_statement`, `termination_statement`, `comment` |
+| `tally_section` | `[t-...]` (`/t-[\w\s]*\w/i`) | `title_definition`, `parameter_definition`, `extended_parameter_definition`, `continued_statement`, directives, `comment` |
+| `material_section` | `[material]` | see Material below (a `choice` of normal vs reverse layout) |
+| `surface_section` | `[surface]` | `surface_definition`, directives, `c_comment` |
+| `cell_section` | `[cell]` | `cell_definition`, `continued_cell_definition`, `extended_cell_definition`, directives, `c_comment` |
+| `data_section` | fixed `data_section_name` list (transform, temperature, mat-time-change, magnetic-field, delta-ray, volume, timer, …) | `line` \| `comment` \| `'\n'` (contents TODO) |
+| `other_section` | catch-all `/\w[\s\w]*\w/` | `line` \| `comment` \| `'\n'` (contents TODO) |
+| `terminator` | `[end]` | — |
+
+("directives" = `user_definition`, `insert_file_statement`, `skip_section_statement`, `termination_statement`. Parameter/tally bodies also append the optional EOF trailing `parameter_definition`.)
+
+**Material rules**
+
+- `material_name` → `mat[<index>]` **or** `m<index>` (both expose the number as an `index` node).
+- `material_definition` → `material_name` then one of: `inline_comment`, `repeat1(element_definition)`, or `field("material_id", string)`.
+- `element_definition` → `element` + `field("ratio", number)`. Reverse layout uses `reverse_element_definition` → `field("ratio", number)` + `element`.
+- `element` → token `/\d*[a-zA-Z]+|\d+/` (symbol `Fe`, `56Fe`, or bare ZZZAAA id).
+- `scattering_definition` → `mt<N>` + `field("material_id", string)` (S(α,β)).
+- `continued_material_definition` → `repeat1(element_definition)` on follow-on lines; `extended_material_definition` = `material_definition` + `repeat1(continued_material_definition)`.
+- Reverse layout is gated by `reverse_order_clause` (`den nuc`) and uses the `reverse_*` variants throughout.
+
+**Surface rules**
+
+- `surface_definition` → `field("surface_number", index)`, `field("transform_number", index?)`, `field("surface_symbol", surface_symbol)`, `repeat1(math_expression)`, optional `inline_comment`, `'\n'`.
+- `surface_symbol` → token `/[a-zA-Z]+/` or `/[a-zA-Z]\/[a-zA-Z]/` (e.g. `PY`, `SO`, `C/Y`). Must be a named rule/alias — a field over a bare regex renders nothing.
+
+**Cell rules** (MCNP-style CSG)
+
+- `cell_definition` → `field("cell_number", index)`, `field("material_number", integer)`, `field("material_density", number?)`, `repeat1(surface_expression)`, optional `like <field("like_cell_number", index)> but`, optional `cell_properties`, `'\n'`.
+- `surface_expression` → `integer` \| `parenthesized_surface_expression` (`( … )`, prec 4) \| `not_surface_expression` (`#expr`, prec 3, complement) \| `or_surface_expression` (`expr : expr`, prec 2, union). Implicit `repeat1` = intersection.
+- `continued_cell_definition` → `/ {6,}/` indent + (`cell_properties+` \| `surface_expression+` \| `number+`) + `'\n'`; `extended_cell_definition` = `cell_definition` + `repeat1(continued_cell_definition)`.
+- `cell_properties` → `repeat1` of `fill = universe_lattice_number+` or `field = number`. `universe_lattice_number` → `index[:index…]`.
+
+**Shared statement rules**
+
+- `parameter_definition` = `_parameter_statement` + `'\n'`; `_parameter_statement` = `field '=' expressions [';'] [inline_comment]`.
+- `extended_parameter_definition` = `parameter_definition` + `repeat1(continued_statement)`.
+- `continued_statement` = `math_expression` + `repeat(math_expression | time_unit)` + optional `inline_comment`. `time_unit` = `/[smhdy]/i`.
+- `title_definition` = `title = title_string`. `file_definition` = `file_field [ '(' index ')' ] '=' filepath`.
+- `user_definition` = `set:` + `repeat1(c <index> [ <math_expression> ])`.
+- `insert_file_statement` = `infl:` `{ filepath }` optional `line_numbers` (`[ index? - index? ]`).
+- `skip_section_statement` = `qp:`; `termination_statement` = `q:`.
+
+**Expressions & tokens**
+
+- `expressions` = `repeat1(expression)`; `expression` = `string` \| `math_expression` \| `{ index - index }` \| `newline_escape`.
+- `math_expression` = `number` \| `parenthesized_expression` \| `unary_expression` \| `binary_expression`. Binary ops `**` (prec 3), `* /` (prec 2), `+ -` (prec 1); unary `+ -`.
+- `field` = `identifier` optional `'(' index ')'`. `identifier` = `/[$<]?[a-zA-Z][\w-]*[>]?/` or `2d-type`.
+- `number` = `integer` \| `float` \| `/c\d+/i`; `float` = decimal, scientific, or `pi`. `index` = `/\d+/`, `integer` = `/[-+]?\d+/`.
+- `string` = `/[a-zA-Z_][a-zA-Z0-9_\-.]*[+-]?/`; `filepath` = `/[a-zA-Z0-9-_.:/\\]+/`; `title_string`/`line` = essentially rest-of-line.
+- Comments: `dollar_comment` (`$…`, in `extras` so legal anywhere), `hash_comment` (`#…`), `exclamation_comment` (`!…`), `c_comment` (`c …` line, CRLF-aware, ≤4 leading spaces). `inline_comment` = hash \| exclamation; `comment` = hash \| exclamation \| c.
+- `extras` = whitespace `/\s/` + `dollar_comment` (skipped between tokens everywhere).
+
 ### Line-termination is load-bearing
 
 `parameter_definition`, `cell_definition`, and `surface_definition` end with an explicit `'\n'`. This is not cosmetic — it forces the parser to commit at line boundaries and resolves otherwise-ambiguous space-separated number lists (e.g. deciding whether the next integer continues the current surface or starts a new one). Removing these newlines reintroduces cross-line misparses. Because a real `\n` is required, files whose **last line lacks a trailing newline** are handled specially: `parameter_definition` is split into `_parameter_statement` (no newline) + `'\n'`, and each parameter-bearing body appends `optional(alias($._parameter_statement, $.parameter_definition))` so the final newline-less line still parses as a `parameter_definition`. (An external scanner would be the "proper" EOF fix, but scanners live outside `grammar.js` and are off-limits here.)
