@@ -7,61 +7,51 @@
   :type 'directory
   :group 'phits)
 
-(defvar phits-inp-ts--section-padding 200)
-(defvar-local phits-inp-ts--surface-index-list nil)
-(defvar-local phits-inp-ts--cell-index-list nil)
+(defvar-local phits-inp-ts--index-cache nil
+  "Memo of (TICK . (SURFACE-INDICES . CELL-INDICES)) for this buffer.
+Recomputed by `phits-inp-ts--index-sets' whenever the buffer text
+changes, so a single fontification pass queries the tree once instead
+of re-traversing it for every integer.")
 
 
 (defun phits-inp-ts--get-surface-indices ()
-  (let* ((root (treesit-buffer-root-node))
-		 (section-body (treesit-search-subtree root "surface_section_body")))
+  "List the surface numbers declared in the surface section, or nil
+when there is no surface section."
+  (when-let* ((root (treesit-buffer-root-node))
+			  (section-body (treesit-search-subtree root "surface_section_body")))
 	(seq-map (lambda (i) (string-to-number (treesit-node-text (cdr i) t)))
 			 (treesit-query-capture section-body
 									'((surface_definition
 									   surface_number: (index) @index))))))
 
 (defun phits-inp-ts--get-cell-indices ()
-  (let* ((root (treesit-buffer-root-node))
-		 (section-body (treesit-search-subtree root "cell_section_body")))
+  "List the cell numbers declared in the cell section, or nil when
+there is no cell section."
+  (when-let* ((root (treesit-buffer-root-node))
+			  (section-body (treesit-search-subtree root "cell_section_body")))
 	(seq-map (lambda (i) (string-to-number (treesit-node-text (cdr i) t)))
 			 (treesit-query-capture section-body
 									'((cell_definition
 									   cell_number: (index) @index))))))
 
-(defun phits-inp-ts--update-surface-index-list (ranges parser)
-  (when (eq parser treesit-primary-parser)
-  (if (not ranges)
-	  (setq-local phits-inp-ts--surface-index-list (phits-inp-ts--get-surface-indices))
-
-	(let ((surface-section-body-range (phits-inp-ts--get-node-range "surface_section_body")))
-	  (dolist (range ranges)
-		(when (and (> (cdr range) (- (car surface-section-body-range) phits-inp-ts--section-padding))
-				 (< (car range) (+ (cdr surface-section-body-range) phits-inp-ts--section-padding)))
-			(setq-local phits-inp-ts--surface-index-list (phits-inp-ts--get-surface-indices))))))))
-
-(defun phits-inp-ts--update-cell-index-list (ranges parser)
-  (if (not (eq parser treesit-primary-parser)) (return))
-  (if (not ranges)
-	  (setq-local phits-inp-ts--cell-index-list (phits-inp-ts--get-cell-indices))
-
-	(let ((cell-section-body-range (phits-inp-ts--get-node-range "cell_section_body")))
-	  (dolist (range ranges)
-		(if (and (> (cdr range) (- (car cell-section-body-range) phits-inp-ts--section-padding))
-				 (< (car range) (+ (cdr cell-section-body-range) phits-inp-ts--section-padding)))
-			(setq-local phits-inp-ts--cell-index-list (phits-inp-ts--get-cell-indices)))))))
-
-
-(defun phits-inp-ts--get-node-range (type)
-  (let* ((root (treesit-buffer-root-node))
-		 (node (treesit-search-subtree root type)))
-	`(,(treesit-node-start node) . ,(treesit-node-end node))))
+(defun phits-inp-ts--index-sets ()
+  "Return (SURFACE-INDICES . CELL-INDICES) for the current buffer.
+The tree is queried in place; the result is memoized per
+`buffer-chars-modified-tick' so every integer in one fontification
+pass shares a single query and it refreshes automatically on edits."
+  (let ((tick (buffer-chars-modified-tick)))
+	(unless (eql (car phits-inp-ts--index-cache) tick)
+	  (setq phits-inp-ts--index-cache
+			(cons tick (cons (phits-inp-ts--get-surface-indices)
+							 (phits-inp-ts--get-cell-indices)))))
+	(cdr phits-inp-ts--index-cache)))
 
 
 (defun phits-inp-ts--fontify-cell-index (node override start end &rest _)
-  (let ((index (string-to-number (treesit-node-text node t))))
-	(if (< index 0) (setq index (- index)))
-	(when (and (null (member index phits-inp-ts--surface-index-list))
-			   (not (null (member index phits-inp-ts--cell-index-list))))
+  (let* ((sets (phits-inp-ts--index-sets))
+		 (index (abs (string-to-number (treesit-node-text node t)))))
+	(when (and (not (member index (car sets)))
+			   (member index (cdr sets)))
 	  (treesit-fontify-with-override (treesit-node-start node) (treesit-node-end node) 'font-lock-constant-face t))))
 
 
@@ -141,7 +131,7 @@
    :feature 'index
    '((material_name (index) @font-lock-property-name-face)
 	 (cell_definition
-	  material_number: (index) @font-lock-property-name-face)
+	  material_number: (integer) @font-lock-property-name-face)
 	 (surface_definition
 	  surface_number: (index) @font-lock-function-name-face)
 	 (surface_expression (integer) @font-lock-function-name-face)
@@ -173,10 +163,6 @@
   :group 'phits
   (when (treesit-ready-p 'phits)
 	(setq-local treesit-primary-parser (treesit-parser-create 'phits))
-	(setq phits-inp-ts--surface-index-list (phits-inp-ts--get-surface-indices))
-	(setq phits-inp-ts--cell-index-list (phits-inp-ts--get-cell-indices))
-	(treesit-parser-add-notifier treesit-primary-parser #'phits-inp-ts--update-cell-index-list)
-	(treesit-parser-add-notifier treesit-primary-parser #'phits-inp-ts--update-surface-index-list)
 	(phits-inp-ts-setup)))
 
 (provide 'phits)
