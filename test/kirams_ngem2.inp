@@ -1,0 +1,884 @@
+$ -*- mode: phits-inp-ts; coding: utf-8; -*-
+
+$omp=20
+
+[Title]
+KIRAMS radiation test on May 16
+
+
+[Parameters]
+icntl    = 0     $ 0: Normal simulation
+maxcas   = 50000000     $ Number of histories per batch
+maxbch   = 200     $ Number of batches
+e-mode   = 0
+negs     = 1
+jmout    = 1
+igamma   = 3 $ D=2
+ngem     = 2 $ !IMPORTANT Use GEM ver 2.
+istdev   = 1      $ Calculate standard deviation across batches
+mdbatima = 5000
+
+[Source]
+$ <source> = 9
+$--- 26 MeV Proton beam ---
+$ +y direction, beam origin = (x = 0 cm, y = 0 cm, z = 14.5 cm)
+s-type  =  3              $ Gaussian shaped source
+proj    =  proton         $ Projectile particle
+x0      =   0.0           $ Beam center X
+x1      =   0.5           $ FWHM in x
+y0      =   2.0           $ Beam center Y
+y1      =   0.5           $ FWHM in y
+z0      =  14.5           $ beam center z
+z1      =   0.5           $ FWHM in z
+dir     =   0             $ 90 degrees from the z axis (cos(90°) = 0)
+phi     =   90            $ 90 degrees from the x axis in the xy plane
+dom     =   0.1           $ 0.1 steradian angular variance (practically none)
+e-type  = 2               $ Gaussian energy distribution
+eg0     = 26              $ (MeV) Bean energy
+eg1     = 1               $ (MeV) Standard deviation of energy
+eg2     = 22              $ Minimum energy cutoff
+eg3     = 30              $ Maximum energy cutoff
+
+$ <source> = 1
+$ s-type  =  3
+$ proj    =  proton         $ Projectile
+$ x0      =   0.0           $ Beam center X
+$ x1      =   0.5           $ FWHM in x
+$ y0      =   0.0           $ Beam center Y
+$ y1      =   0.5           $ FWHM in y
+$ z0      =  14.5           $ beam center z
+$ z1      =   0.5           $ FWHM in z
+$ dir     =   0             $ 90 degrees from the z axis (cos(90°) = 0)
+$ phi     =   90            $ 90 degrees from the x axis in the xy plane
+$ dom     =   0.1
+$ e-type  = 3
+$ et0     = 0.001
+$ et1     = 0.00001
+$ et2     = 0.1
+
+
+[ Material ]
+$==============================================================
+$  mat 1  Be      beryllium target
+$  mat 2  Al      aluminum beamline structure
+$  mat 3  C       graphite collimator
+$  mat 4  Concrete + Eu  46.56 ug  (top)
+$  mat 5  Concrete + Eu 216.99 ug  (left)
+$  mat 6  Concrete + Eu 431.27 ug  (right)
+$  mat 7  PMMA    acrylic specimen case
+$  mat 8  SUS304  stainless steel table
+$  mat 9  Air     dry air at STP
+$  mat 10 Gold    gold foil specimen
+$  Trace element reference: NIST SRM 1d (Trace Elements in Concrete)
+$==============================================================
+
+$--- mat 1: Beryllium ---
+$    rho = -1.848 g/cm^3
+mat[1]
+        4009   1.0          $ Be-9
+
+$--- mat 2: Aluminium ---
+$    rho = -2.700 g/cm^3
+mat[2]
+        13027  1.0          $ Al-27
+
+$--- mat 3: Carbon (graphite) ---
+$    rho = -2.000 g/cm^3
+mat[3]
+        6000   1.0          $ C (natural)
+
+$--- mat 5: Concrete + Eu 10 ppm ---
+mat[4]
+$ major elements
+O  -0.548121824
+Si -0.310838728
+Ca -0.092057328
+Al -0.013180178
+Fe -0.008714811
+Mg -0.004502906
+K  -0.005209559
+S  -0.003478106
+H  -0.010141026
+Na -0.00155831
+
+$ trace elements
+Ti -0.001124664
+Mn -0.000311662
+P  -0.000186886
+Sr -0.000186886
+Ba -0.000155831
+C  -0.000217382
+Eu -9.86633E-06
+Co -4.04736E-06
+
+$--- mat 5: Concrete + Eu 50 ppm ---
+mat[5]
+$ major elements
+O  -0.548101419
+Si -0.310827156
+Ca -0.092053901
+Al -0.013179687
+Fe -0.008714486
+Mg -0.004502738
+K  -0.005209365
+S  -0.003477977
+H  -0.010140649
+Na -0.001558252
+
+$ trace elements
+Ti -0.001124622
+Mn -0.00031165
+P  -0.000186879
+Sr -0.000186879
+Ba -0.000155825
+C  -0.000217374
+Eu -4.70928E-05
+Co -4.04721E-06
+
+$--- mat 6: Concrete + Eu 100 ppm ---
+mat[6]
+$ major elements
+O  -0.548075915
+Si -0.310812693
+Ca -0.092049618
+Al -0.013179074
+Fe -0.008714081
+Mg -0.004502528
+K  -0.005209123
+S  -0.003477815
+H  -0.010140177
+Na -0.00155818
+
+$ trace elements
+Ti -0.00112457
+Mn -0.000311636
+P  -0.00018687
+Sr -0.00018687
+Ba -0.000155818
+C  -0.000217363
+Eu -9.36219E-05
+Co -4.04702E-06
+
+$--- mat 7: PMMA (acrylic / Lucite) ---
+$    rho = -1.190 g/cm^3
+$    (C5H8O2)n  ->  C 59.98%, H 8.05%, O 31.96% by weight
+mat[7]
+         6000  -0.5998      $ C
+         1001  -0.0805      $ H
+         8016  -0.3196      $ O
+
+$--- mat 8: SUS304 Stainless Steel ---
+$    rho = -8.0 g/cm^3
+mat[8]
+        26000  -0.690       $ Fe (natural)
+        24000  -0.190       $ Cr (natural)
+        28000  -0.100       $ Ni (natural)
+        25055  -0.020       $ Mn-55
+
+$--- mat 9: Dry Air at STP ---
+$    rho = -1.293e-3 g/cm^3
+mat[9]
+         7014  -0.755000    $ N-14
+         8016  -0.232000    $ O-16
+        18000  -0.013000    $ Ar (natural)
+
+$--- mat 10: Gold ---
+$    rho = -19.32 g/cm^3
+mat[10]
+        79000    1.0
+
+[ Surface ]
+$--- Be Target (cylinder, R=1.5 cm, axis along y) ---
+$ Infinite cylinder along y at (x=0, z=14.5)
+ 101  C/Y   0.0   14.5   1.5      $ Be target outer surface R=1.5 cm
+ 102  PY    5.0                    $ Be target downstream face  (y=5.0 cm)
+ 103  PY    4.5                    $ Be target upstream face (y=4.5 cm)
+
+$--- Al Case (annular cylinder, R_in=1.5 cm, R_out=4.5 cm) ---
+ 111  C/Y   0.0   14.5   4.5      $ Al case outer surface R=4.5 cm
+ 112  C/Y   0.0   14.5   1.5      $ Al case inner bore R=1.5 cm  (= surf 101)
+ 113  PY    6.6                    $ Al case downstream face   (y=6.6 cm)
+ 114  PY    4.4                    $ Al case upstream face (y=4.4 cm)
+$ Note: surf 112 is geometrically identical to surf 101;
+$       reference surf 101 directly in cell cards for the bore.
+
+$--- Collimator (carbon, stepped annular body) ---
+$    Pad002 (outer collar): R_in=1.0cm, R_out=2.75cm, y=6.6 - 7.5cm
+$    Pad003 (inner tube):   R_in=1.0cm, R_out=1.5cm,  y=4.1 - 7.5cm
+$    Step at y=6.6cm: outer radius increases from 1.5 to 2.75 cm
+ 121  C/Y   0.0   14.5   2.75     $ Collimator outer radius (Pad002), R=2.75 cm
+ 122  C/Y   0.0   14.5   1.5      $ Collimator step radius (Pad002 inner = Pad003 outer)
+ 123  C/Y   0.0   14.5   1.0      $ Collimator bore R=1.0 cm
+ 124  PY    7.5                    $ Collimator downstream face (y=7.5 cm)
+ 125  PY    6.6                    $ Collimator step plane   (y=6.6 cm)
+ 126  PY    5.0                    $ Collimator upstream face (y=4.1 cm)
+
+
+$=== 조사실 시설 외 물질 ==================================================================================
+$--- Specimen Case (시편 케이스) ---
+$    Three cylinders R=1.6 cm, thickness 1.5 mm (y=9.85~10.0 cm)
+$    Centers: (0,14.5)z=16.75, (±1.9486, 13.375) cm in x-z plane
+ 201  C/Y   0.0      16.75    1.6   $ Specimen case of 10 ppm specimen (top) 10 ppm
+ 202  C/Y  -1.9486   13.375   1.6   $ Specimen case for 50 ppm specimen (left) 50 ppm
+ 203  C/Y   1.9486   13.375   1.6   $ Specimen case hole 100 ppm specimen (right) 100 ppm
+ 204  PY   12.5                     $ Specimen case downstream face   (y=10.0 cm) + shift 2.5 cm
+ 205  PY   12.35                    $ Specimen case upstream face (y=9.85 cm) + shift 2.5 cm
+
+$--- Concrete Specimen (콘크리트 시편) ---
+$    Same three cylinder positions, thickness 2.7 mm (y=9.58~9.85 cm)
+$ (reuses surfs 201, 202, 203 for cylinder walls)
+ 211  PY   12.066                    $ 10 ppm Concrete specimen upstream face 0.284 cm
+ 212  PY   12.055                    $ 50 ppm Concrete specimen upstream face 0.295 cm
+ 213  PY   12.076                    $ 100 ppm Concrete specimen upstream face 0.274 cm
+$ Note: upstream face is surf 205
+
+$--- Gold Specimen (금박 시편) ---
+$    mass 1.36 (5) mg, diameter 3.3 (1) mm
+$    calculated thickness 2.058 (146) um
+$ (reuses surfs 204)
+221   PY   12.499794
+222   C/Y  0.0   14.5   0.165
+$=============================================================================================
+
+$--- Stainless Steel Table (Extrude005) ---
+$    Rectangular slab: x=[-25,25], y=[0,300], z=[-1.0, 0.0] cm
+ 301  PX   25.0                    $ Table +x face
+ 302  PX  -25.0                    $ Table -x face
+ 303  PY  50.0                    $ Table +y face (far end)
+ 304  PY    0.0                    $ Table upstream/beam-entrance face
+ 305  PZ    0.0                    $ Table top surface    (z=0)
+ 306  PZ   -1.0                    $ Table bottom surface (z=-1.0 cm)
+
+$--- Outer void boundary ---
+ 999  RPP   -10.0 10.0 0.0 12.7 4.5 24.5
+
+
+[ Cell ]
+$--- Cell 1: Be Target ---
+$    inside cyl 101 (-101), below upstream plane 102 (-102), above downstream plane 103 (103)
+  1  1  -1.848  -101 -102  103    $ Be target (rho=-1.848 g/cm^3)
+
+$--- Cell 2: Al Case (annular body) ---
+$    Anuulus surrounding beryllium target
+$     inside outer cyl 111 (-111), outside bore cyl 101 (101),
+$     below upstream plane 113 (-113), above downstream plane 114 (114)
+$    or
+$    Disc blocking proton upstream
+$      inside outer cyl 111 (-111), outside bore cyl 101 (101),
+$      below upstream plane 103 (-103), above downstream plane 114 (114)
+  2  2  -2.700  (-111  101 -113  114):(-101 -103 114)    $ Al case annular body (rho=-2.700 g/cm^3)
+
+$--- Cell 3: Al Case bore — air gap (inside bore, outside Be target region) ---
+$    inside cyl 101 (-101), between planes 114..113,
+$    excluding the Be target slab: require above 102 OR below 103
+$  3  0             $ Air inside Al bore
+
+$--- Cell 4: Collimator (carbon) ---
+$    Outer collar
+$      inside outer cyl 121 (-121), outside step cyl 122 (122),
+$      between step plane 125 and downstream face 124
+$    or
+$    Inner tube
+$      inside step cyl 122 (-122), outside inner cyl 123 (123),
+$      between upstream plane 126 and downstream face 124
+  4  3  -2.000  (-121 122 -124 125):(-122 123 -124 126)    $ Collimator outer collar (rho=-2.0 g/cm^3, C)
+
+$--- Cell 6a: Gold specimen ---
+$    cylinder with thickness 2.058 (146) um
+$      inside cyl 222 (-222)
+$      between upstream plane 221 and downstream face 204
+  6  10  -19.32        -222 -204 221         $ Air inside collimator bore
+
+$--- Cell 7: Concrete specimens (3 cylinders) ---
+$    inside any of the 3 specimen cylinders (union: -201:-202:-203),
+$    between upstream plane 205 (-205) and downstream plane 211 (211)
+  7  4  -1.74   -201 -205  211   $ Concrete specimens 10 ppm (top)
+  8  5  -1.78   -202 -205  212   $ Concrete specimens 50 ppm (left)
+  9  6  -1.71   -203 -205  213   $ Concrete specimens 100 ppm (right)
+
+$--- Cell 8: Specimen Case plate (PMMA acrylic) ---
+$    Same 3 cylinders as concrete (surfs 201, 202, 203), shifted downstream.
+$    Between downstream plane 205 (205) and upstream plane 204 (-204).
+  10  7  -1.190  (-201:-202:-203) -204  205   $ PMMA specimen case (rho=-1.190 g/cm^3)
+
+
+$--- Cell 9: Stainless Steel Table ---
+  11  8  -8.0  -301  302 -303  304 -305  306   $ Stainless table (rho=-8.0 g/cm^3)
+
+$--- Cell 100: Room air (all space inside boundary not already assigned) ---
+ 100  9  -1.293e-3  -999  #1 #2 #4 #6 #7 #8 #9 #10 #11   $ Dry air (rho=-1.293e-3 g/cm^3)
+
+$--- Cell 9999: Outside simulation boundary ---
+9999  -1   999   $ Outer void
+
+
+[Volume]
+reg   vol   $ cc
+6     1.7602e-5
+7     2.333
+8     2.425
+9     2.255
+
+[Forced Collisions]
+part   = neutron
+reg    fcl
+6      1.0
+
+[Weight Window]
+mesh   = reg
+part   = neutron
+eng    = 2
+         1e-4   4e1
+reg      ww1    ww2
+6        0.1    0.01
+100      0.5    0.05    
+
+[T-Track]
+title  = neutron spectrum at Au foil
+part   = neutron
+mesh   = xyz
+x-type =  2
+nx     =  1
+xmin   = -0.165
+xmax   =  0.165
+y-type =  2
+ny     =  1
+ymin   =  12.49
+ymax   =  12.499
+z-type =  2
+nz     =  1
+zmin   = 14.335
+zmax   = 14.665
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = neutron_spectrum_Au.out
+epsout = 1
+
+[T-Track]
+title  = spatial neutron distribtuion
+part   = neutron
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_neutron_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial electron distribtuion
+part   = electron
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_electron_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial photon distribtuion
+part   = photon
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_photon_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial proton distribtuion
+part   = proton
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_proton_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial pion+ distribtuion
+part   = pion+
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_pion+_spectrum.out
+epsout = 1
+
+
+[T-Track]
+title  = spatial pion- distribtuion
+part   = pion-
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_pion-_spectrum.out
+epsout = 1
+
+
+[T-Track]
+title  = spatial pion0 distribtuion
+part   = pion0
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_pion0_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial positron distribtuion
+part   = positron
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_positron_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial kaon+ distribtuion
+part   = kaon+
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_kaon+_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial kaon- distribtuion
+part   = kaon-
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_kaon-_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial muon+ distribtuion
+part   = muon+
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_muon+_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial muon- distribtuion
+part   = muon-
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_muon-_spectrum.out
+epsout = 1
+
+[T-Track]
+title  = spatial alpha distribtuion
+part   = alpha
+mesh   = xyz
+x-type =  2
+nx     =  20
+xmin   = -10.0
+xmax   =  10.0
+y-type =  2
+ny     =  1
+ymin   =  12.0
+ymax   =  12.01
+z-type =  2
+nz     =  20
+zmin   = 4.5
+zmax   = 24.5
+e-type =  3
+ne     = 200
+emin   = 1e-9
+emax   = 26
+
+unit   = 3
+axis   = eng
+file   = spatial_alpha_spectrum.out
+epsout = 1
+
+
+$ [T-Track]
+$ title  = Sanity check for neutron
+$ part   = neutron
+
+$ mesh   = xyz
+$ x-type = 2
+$ nx     = 100
+$ xmin   = -10
+$ xmax   = 10
+$ y-type = 2
+$ ny     = 100
+$ ymin   = 0
+$ ymax   = 20
+$ z-type = 2
+$ nz     = 1
+$ zmin   = 10
+$ zmax   = 19
+
+$ e-type = 3
+$ ne     = 10
+$ emin   = 1e-3
+$ emax   = 26
+
+$ a-type = 1
+$ na     = 1
+$ amin   = -1
+$ amax   = 1
+
+$ unit   = 2
+$ axis   = xy
+$ file   = neutron_flux.out
+$ epsout = 1
+
+$ [T-Track]
+$ title  = Sanity check for electron
+$ part   = electron
+
+$ mesh   = xyz
+$ x-type = 2
+$ nx     = 100
+$ xmin   = -10
+$ xmax   = 10
+$ y-type = 2
+$ ny     = 100
+$ ymin   = 0
+$ ymax   = 20
+$ z-type = 2
+$ nz     = 1
+$ zmin   = 10
+$ zmax   = 19
+
+$ e-type = 3
+$ ne     = 10
+$ emin   = 1e-3
+$ emax   = 26
+
+$ a-type = 1
+$ na     = 1
+$ amin   = -1
+$ amax   = 1
+
+$ unit   = 2
+$ axis   = xy
+$ file   = electron_flux.out
+$ epsout = 1
+
+$ [T-Track]
+$ title  = Sanity check for photon
+$ part   = photon
+
+$ mesh   = xyz
+$ x-type = 2
+$ nx     = 100
+$ xmin   = -10
+$ xmax   = 10
+$ y-type = 2
+$ ny     = 100
+$ ymin   = 0
+$ ymax   = 20
+$ z-type = 2
+$ nz     = 1
+$ zmin   = 10
+$ zmax   = 19
+
+$ e-type = 3
+$ ne     = 10
+$ emin   = 1e-3
+$ emax   = 26
+
+$ $ a-type = 1
+$ $ na     = 1
+$ $ amin   = -1
+$ $ amax   = 1
+
+$ unit   = 2
+$ axis   = xy
+$ file   = photon_flux.out
+$ epsout = 1
+
+[T-Dchain]
+title  = Au Foil
+mesh   = reg
+reg    = 6
+file   = Au_foil.out
+timeevo = 2
+    2 h 1.0
+	40 h 0.0
+outtime = 5
+    2 h
+   -10 h
+   -21 h
+   -30 h
+   -40 h
+amp    = 6.241509074e13
+ebeam  = 0.026
+idivs   = 5
+iphtout = -20
+ipltmode = 1
+
+[T-Dchain]
+title  = Eu 10 ppm
+mesh   = reg
+reg    = 7
+file   = Eu_10ppm.out
+timeevo = 2
+    2 h 1.0
+	40 h 0.0
+outtime = 5
+    2 h
+   -10 h
+   -20 h
+   -30 h
+   -40 h
+amp    = 6.241509074e13
+ebeam  = 0.026
+idivs   = 5
+iphtout = -20
+ipltmode = 1
+
+
+[T-Dchain]
+title  = Eu 50 ppm
+mesh   = reg
+reg    = 8
+file   = Eu_50ppm.out
+timeevo = 2
+    2 h 1.0
+	40 h 0.0
+outtime = 5
+    2 h
+   -10 h
+   -20 h
+   -30 h
+   -40 h
+amp    = 6.241509074e13
+ebeam  = 0.026
+idivs   = 5
+iphtout = -20
+ipltmode = 1
+
+
+[T-Dchain]
+title  = Eu 100 ppm
+mesh   = reg
+reg    = 9
+file   = Eu_100ppm.out
+timeevo = 2
+    2 h 1.0
+	40 h 0.0
+outtime = 5
+    2 h
+   -10 h
+   -20 h
+   -30 h
+   -40 h
+amp    = 6.241509074e13
+ebeam  = 0.026
+idivs   = 5
+iphtout = -20
+ipltmode = 1
+
+[End]
