@@ -129,6 +129,7 @@ module.exports = grammar({
 			'[', /m\s*a\s*t\s*e\s*r\s*i\s*a\s*l/i, ']',
 			optional($.section_option),
 			optional($.inline_comment),
+			'\n',
 		)),
 		material_section_body: $ => choice(
 			repeat1(choice(
@@ -166,7 +167,7 @@ module.exports = grammar({
 					optional($.inline_comment),
 				),
 				seq(
-					$.material_id,
+					field("material_id", $.string),
 					optional($.inline_comment),
 				),
 			),
@@ -180,7 +181,7 @@ module.exports = grammar({
 					optional($.inline_comment),
 				),
 				seq(
-					$.material_id,
+					field("material_id", $.string),
 					optional($.inline_comment),
 				)
 			),
@@ -203,17 +204,15 @@ module.exports = grammar({
 		)),
 		material_name: $ => choice(
 			seq(/mat/i, '[', $.index, ']'),
-			/m\d+/i,
+			seq(/m/i, $.index),
 		),
 		scattering_definition: $ => seq(
 			/mt\d+/i,
-			$.material_id,
+			field("material_id", $.string),
 		),
-		material_id: $ => $.string,
-		element_definition: $ => seq($.element, $.ratio),
-		reverse_element_definition: $ => seq($.ratio, $.element),
+		element_definition: $ => seq($.element, field("ratio", $.number)),
+		reverse_element_definition: $ => seq(field("ratio", $.number), $.element),
 		element: $ => token(/\d*[a-zA-Z]+|\d+/),
-		ratio: $ => $.number,
 
 		// surface
 		surface_section: $ => seq($.surface_section_header, optional($.surface_section_body)),
@@ -233,11 +232,12 @@ module.exports = grammar({
 		surface_definition: $ => prec.left(seq(
 			field("surface_number", $.index),
 			field("transform_number", optional($.index)),
-			field("surface_symbol", choice(/[a-zA-Z]+/, /[a-zA-Z]\/[a-zA-Z]/)),
+			field("surface_symbol", $.surface_symbol),
 			prec.right(repeat1($.math_expression)),
 			optional($.inline_comment),
 			'\n',
 		)),
+		surface_symbol: $ => token(choice(/[a-zA-Z]+/, /[a-zA-Z]\/[a-zA-Z]/)),
 
 		// cell
 		cell_section: $ => seq($.cell_section_header, optional($.cell_section_body)),

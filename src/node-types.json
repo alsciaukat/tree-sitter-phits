@@ -386,17 +386,24 @@
   {
     "type": "element_definition",
     "named": true,
-    "fields": {},
+    "fields": {
+      "ratio": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
           "type": "element",
-          "named": true
-        },
-        {
-          "type": "ratio",
           "named": true
         }
       ]
@@ -636,7 +643,18 @@
   {
     "type": "material_definition",
     "named": true,
-    "fields": {},
+    "fields": {
+      "material_id": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": true,
@@ -650,26 +668,7 @@
           "named": true
         },
         {
-          "type": "material_id",
-          "named": true
-        },
-        {
           "type": "material_name",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
-    "type": "material_id",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "string",
           "named": true
         }
       ]
@@ -681,7 +680,7 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "index",
@@ -1082,21 +1081,6 @@
     }
   },
   {
-    "type": "ratio",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "number",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "reverse_continued_material_definition",
     "named": true,
     "fields": {},
@@ -1118,17 +1102,24 @@
   {
     "type": "reverse_element_definition",
     "named": true,
-    "fields": {},
+    "fields": {
+      "ratio": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "number",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
           "type": "element",
-          "named": true
-        },
-        {
-          "type": "ratio",
           "named": true
         }
       ]
@@ -1156,7 +1147,18 @@
   {
     "type": "reverse_material_definition",
     "named": true,
-    "fields": {},
+    "fields": {
+      "material_id": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": true,
@@ -1167,10 +1169,6 @@
         },
         {
           "type": "inline_comment",
-          "named": true
-        },
-        {
-          "type": "material_id",
           "named": true
         },
         {
@@ -1188,16 +1186,17 @@
   {
     "type": "scattering_definition",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "material_id",
-          "named": true
-        }
-      ]
+    "fields": {
+      "material_id": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -1264,6 +1263,16 @@
         "types": [
           {
             "type": "index",
+            "named": true
+          }
+        ]
+      },
+      "surface_symbol": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "surface_symbol",
             "named": true
           }
         ]
@@ -1772,6 +1781,10 @@
   },
   {
     "type": "string",
+    "named": true
+  },
+  {
+    "type": "surface_symbol",
     "named": true
   },
   {
