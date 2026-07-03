@@ -100,15 +100,7 @@
         "required": true,
         "types": [
           {
-            "type": "-1",
-            "named": false
-          },
-          {
-            "type": "0",
-            "named": false
-          },
-          {
-            "type": "index",
+            "type": "integer",
             "named": true
           }
         ]
@@ -275,6 +267,10 @@
         {
           "type": "number",
           "named": true
+        },
+        {
+          "type": "surface_expression",
+          "named": true
         }
       ]
     }
@@ -312,6 +308,10 @@
         },
         {
           "type": "math_expression",
+          "named": true
+        },
+        {
+          "type": "time_unit",
           "named": true
         }
       ]
@@ -1052,7 +1052,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
@@ -1682,15 +1682,7 @@
     "named": false
   },
   {
-    "type": "-1",
-    "named": false
-  },
-  {
     "type": "/",
-    "named": false
-  },
-  {
-    "type": "0",
     "named": false
   },
   {
@@ -1784,6 +1776,10 @@
   },
   {
     "type": "termination_statement_directive",
+    "named": true
+  },
+  {
+    "type": "time_unit",
     "named": true
   },
   {

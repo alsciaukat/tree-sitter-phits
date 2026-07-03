@@ -20,10 +20,13 @@ module.exports = grammar({
 			optional($.preamble),
 			optional($.body),
 		),
-		preamble: $ => repeat1(choice(
-			$.parameter_definition,
-			$.comment,
-		)),
+		preamble: $ => seq(
+			repeat1(choice(
+				$.parameter_definition,
+				$.comment,
+			)),
+			optional(alias($._parameter_statement, $.parameter_definition)),
+		),
 		body: $ => repeat1(choice(
 			$.title_section,
 			$.parameter_section,
@@ -68,17 +71,20 @@ module.exports = grammar({
 			optional($.section_option),
 			optional($.inline_comment),
 		)),
-		parameter_section_body: $ => repeat1(choice(
-			$.parameter_definition,
-			$.extended_parameter_definition,
-			$.continued_statement,
-			$.file_definition,
-			$.user_definition,
-			$.insert_file_statement,
-			$.skip_section_statement,
-			$.termination_statement,
-			$.comment,
-		)),
+		parameter_section_body: $ => seq(
+			repeat1(choice(
+				$.parameter_definition,
+				$.extended_parameter_definition,
+				$.continued_statement,
+				$.file_definition,
+				$.user_definition,
+				$.insert_file_statement,
+				$.skip_section_statement,
+				$.termination_statement,
+				$.comment,
+			)),
+			optional(alias($._parameter_statement, $.parameter_definition)),
+		),
 		file_definition: $ => prec.left(seq(
 			$.file_field, optional(seq('(', $.index, ')')),
 			'=',
@@ -99,17 +105,20 @@ module.exports = grammar({
 			optional($.section_option),
 			optional($.inline_comment),
 		)),
-		tally_section_body: $ => repeat1(choice(
-			$.title_definition,
-			$.parameter_definition,
-			$.extended_parameter_definition,
-			$.continued_statement,
-			$.user_definition,
-			$.insert_file_statement,
-			$.skip_section_statement,
-			$.termination_statement,
-			$.comment,
-		)),
+		tally_section_body: $ => seq(
+			repeat1(choice(
+				$.title_definition,
+				$.parameter_definition,
+				$.extended_parameter_definition,
+				$.continued_statement,
+				$.user_definition,
+				$.insert_file_statement,
+				$.skip_section_statement,
+				$.termination_statement,
+				$.comment,
+			)),
+			optional(alias($._parameter_statement, $.parameter_definition)),
+		),
 
 		// material
 		material_section: $ => seq(
@@ -203,7 +212,7 @@ module.exports = grammar({
 		material_id: $ => $.string,
 		element_definition: $ => seq($.element, $.ratio),
 		reverse_element_definition: $ => seq($.ratio, $.element),
-		element: $ => token(/\d*[a-zA-Z]+/),
+		element: $ => token(/\d*[a-zA-Z]+|\d+/),
 		ratio: $ => $.number,
 
 		// surface
@@ -227,6 +236,7 @@ module.exports = grammar({
 			field("surface_symbol", choice(/[a-zA-Z]+/, /[a-zA-Z]\/[a-zA-Z]/)),
 			prec.right(repeat1($.math_expression)),
 			optional($.inline_comment),
+			'\n',
 		)),
 
 		// cell
@@ -248,7 +258,7 @@ module.exports = grammar({
 		)),
 		cell_definition: $ => prec(1, seq(
 			field("cell_number", $.index),
-			field("material_number", choice('-1', '0', $.index)),
+			field("material_number", $.integer),
 			field("material_density", optional($.number)),
 			repeat1($.surface_expression),
 			optional(seq(/like/i, field("like_cell_number", $.index), /but/i)),
@@ -259,6 +269,7 @@ module.exports = grammar({
 			/ {6,}/,
 			choice(
 				repeat1($.cell_properties),
+				repeat1($.surface_expression),
 				repeat1($.number)
 			),
 			'\n',
@@ -274,7 +285,7 @@ module.exports = grammar({
 			$.not_surface_expression,
 			$.or_surface_expression,
 		)),
-		parenthesized_surface_expression: $ => prec(4, seq("(", $.surface_expression, ")")),
+		parenthesized_surface_expression: $ => prec(4, seq("(", prec.right(repeat1($.surface_expression)), ")")),
 		not_surface_expression: $ => prec(3, seq('#', $.surface_expression)),
 		or_surface_expression: $ =>  prec.left(2, seq($.surface_expression, ':', $.surface_expression)),
 	 
@@ -348,16 +359,21 @@ module.exports = grammar({
 
 
 		continued_statement: $ => prec.right(seq(
-			repeat1($.math_expression),
+			$.math_expression,
+			repeat(choice($.math_expression, $.time_unit)),
 			optional($.inline_comment),
 		)),
-		parameter_definition: $ => prec.right(seq(
+		time_unit: $ => token(prec(1, /[smhdy]/i)),
+		parameter_definition: $ => seq($._parameter_statement, '\n'),
+		// The body of a parameter statement, without its terminating newline.
+		// Reused (aliased back to parameter_definition) as the optional last line
+		// of a section for files that lack a trailing newline.
+		_parameter_statement: $ => prec.right(seq(
 			$.field,
 			'=',
 			$.expressions,
 			optional(';'),
 			optional($.inline_comment),
-			'\n'
 		)),
 		extended_parameter_definition: $ => prec.left(1, seq(
 			$.parameter_definition,
@@ -417,12 +433,12 @@ module.exports = grammar({
 			token(/[$<]?[a-zA-Z][\w-]*[>]?/),
 			/2d-type/i,
 		),
-		string: $ => token(/[a-zA-Z_][a-zA-Z0-9_\-.]*/),
+		string: $ => token(/[a-zA-Z_][a-zA-Z0-9_\-.]*[+-]?/),
 		title_string: $ => token(/.*/),
-		filepath: $ => token(/[a-zA-Z0-9-_./]+/),
+		filepath: $ => token(/[a-zA-Z0-9-_.:/\\]+/),
 		section_option: $ => repeat1($.string),
 		index: $ => token(/\d+/),
-		integer: $ => token(/-?\d+/),
+		integer: $ => token(/[-+]?\d+/),
 		number: $ => choice(
 			$.integer,
 			$.float,
@@ -440,6 +456,6 @@ module.exports = grammar({
 		dollar_comment: $ => token(/[$].*/),
 		hash_comment: $ => token(/[#].*/),
 		exclamation_comment: $ => token(/[!].*/),
-		c_comment: $ => token(/ {0,4}c([ \t].*|\n)/),
+		c_comment: $ => token(/ {0,4}c([ \t].*|\r?\n)/),
 	}
 });
