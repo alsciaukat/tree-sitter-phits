@@ -14,5 +14,9 @@ function parse () {
 
 function build () {
 	tree-sitter generate
-	tree-sitter build -o ~/.emacs.d/tree-sitter/libtree-sitter-phits.so 
+	tree-sitter build -o ~/.emacs.d/tree-sitter/libtree-sitter-phits.so
 }
+
+# Dispatch on the first argument: `./commands.sh parse <name>` or
+# `./commands.sh build`.
+"$@"
