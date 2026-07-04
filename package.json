@@ -2,7 +2,7 @@
   "name": "tree-sitter-phits",
   "version": "0.1.0",
   "description": "Parser for the input file of Particle and Heavy Ion Transport code System (PHITS)",
-  "repository": "https://github.com/tree-sitter/tree-sitter-phits",
+  "repository": "https://github.com/alsciaukat/tree-sitter-phits",
   "license": "MIT",
   "author": {
     "name": "Jeemin Kim",
