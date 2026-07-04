@@ -15,6 +15,12 @@ module.exports = grammar({
 		$.dollar_comment,
 	],
 
+	conflicts: $ => [
+		// `( number )` in a tabular row: a parenthesised math expression or a
+		// single-item data_group (region specifier).  Both are acceptable.
+		[$.math_expression, $.data_group_item],
+	],
+
 	rules: {
 		source_file: $ => seq(
 			optional($.preamble),
@@ -34,6 +40,7 @@ module.exports = grammar({
 			$.surface_section,
 			$.cell_section,
 			$.tally_section,
+			$.tabular_section,
 			$.data_section,
 			$.other_section,
 			$.terminator,
@@ -297,6 +304,75 @@ module.exports = grammar({
 		universe_lattice_number: $ => seq($.index, optional(seq(':', $.universe_lattice_number))),
 
 
+		// tabular data / other sections: region-, material-, or particle-keyed
+		// tables.  Shared shape = optional `key = value` parameter lines, a
+		// column-header row, and data rows.  Column semantics are intentionally
+		// generic (a row is just a sequence of cells terminated by a newline).
+		tabular_section: $ => seq(
+			$.tabular_section_header,
+			optional($.tabular_section_body),
+		),
+		tabular_section_header: $ => prec.left(seq(
+			'[', $.tabular_section_name, ']',
+			optional($.section_option),
+			optional($.inline_comment),
+			'\n',
+		)),
+		tabular_section_name: $ => choice(
+			/v\s*o\s*l\s*u\s*m\s*e/i,
+			/t\s*e\s*m\s*p\s*e\s*r\s*a\s*t\s*u\s*r\s*e/i,
+			/m\s*a\s*t\s*t\s*i\s*m\s*e\s*c\s*h\s*a\s*n\s*g\s*e/i,
+			/e\s*l\s*a\s*s\s*t\s*i\s*c\s*o\s*p\s*t\s*i\s*o\s*n/i,
+			/s\s*u\s*p\s*e\s*r\s*m\s*i\s*r\s*r\s*o\s*r/i,
+			/i\s*m\s*p\s*o\s*r\s*t\s*a\s*n\s*c\s*e/i,
+			/w\s*e\s*i\s*g\s*h\s*t\s*w\s*i\s*n\s*d\s*o\s*w/i,
+			/w\s*w\s*b\s*i\s*a\s*s/i,
+			/f\s*o\s*r\s*c\s*e\s*d\s*c\s*o\s*l\s*l\s*i\s*s\s*i\s*o\s*n\s*s/i,
+			/m\s*u\s*l\s*t\s*i\s*p\s*l\s*i\s*e\s*r/i,
+			/c\s*o\s*u\s*n\s*t\s*e\s*r/i,
+			/r\s*e\s*g\s*n\s*a\s*m\s*e/i,
+			/m\s*a\s*t\s*n\s*a\s*m\s*e\s*c\s*o\s*l\s*o\s*r/i,
+		),
+		tabular_section_body: $ => repeat1(choice(
+			$.tabular_parameter,
+			$.tabular_row,
+			$.user_definition,
+			$.insert_file_statement,
+			$.skip_section_statement,
+			$.termination_statement,
+			$.comment,
+		)),
+		tabular_parameter: $ => seq(
+			field("field", $.string),
+			'=',
+			$.expressions,
+			optional($.inline_comment),
+			'\n',
+		),
+		tabular_row: $ => prec.left(seq(
+			repeat1($.data_cell),
+			optional($.inline_comment),
+			'\n',
+		)),
+		data_cell: $ => choice(
+			$.math_expression,
+			$.string,
+			$.brace_group,
+			$.data_group,
+		),
+		// { 4 - 7 }, { mat 2 }, { 0.067 0.600 1.00 } — a braced group naming a
+		// region range, a name, or an RGB colour.
+		brace_group: $ => seq('{', repeat1(choice($.number, $.string, '-')), '}'),
+		// ( { 2 - 5 } 8 9 ), ( 6<10[1 0 0]<u=3 ) — a parenthesised region /
+		// lattice / universe specifier used as a table key.
+		data_group: $ => prec(1, seq('(', repeat1($.data_group_item), ')')),
+		data_group_item: $ => choice(
+			$.number,
+			$.string,
+			$.brace_group,
+			'<', '>', '[', ']', '=',
+		),
+
 		// other data sections
 		//
 		// do not move these last two section up
@@ -315,23 +391,22 @@ module.exports = grammar({
 			$.comment,
 			'\n',
 		)),
+		// Structurally-different or nuclide-bearing sections kept on the generic
+		// line body.  The region-keyed *tables* live in tabular_section_name; the
+		// names here are transform/field matrices, per-nuclide data (Data Max,
+		// Frag Data — digit-leading nuclide cells collide with scientific
+		// notation), and other not-yet-modelled bodies.
 		data_section_name: $ => choice(
 			/t\s*r\s*a\s*n\s*s\s*f\s*o\s*r\s*m/i,
-			/t\s*e\s*m\s*p\s*e\s*r\s*a\s*t\s*u\s*r\s*e/i,
-			/m\s*a\s*t\s*t\s*i\s*m\s*e\s*c\s*h\s*a\s*n\s*g\s*e/i,
 			/m\s*a\s*g\s*n\s*e\s*t\s*i\s*c\s*f\s*i\s*e\s*l\s*d/i,
 			/e\s*l\s*e\s*c\s*t\s*r\s*o\s*m\s*a\s*g\s*n\s*e\s*t\s*i\s*c\s*f\s*i\s*e\s*l\s*d/i,
 			/d\s*e\s*l\s*t\s*a\s*r\s*a\s*y/i,
 			/t\s*r\s*a\s*c\s*k\s*s\s*t\s*r\s*u\s*c\s*t\s*u\s*r\s*e/i,
-			/s\s*u\s*p\s*e\s*r\s*m\s*i\s*r\s*r\s*o\s*r/i,
-			/e\s*l\s*a\s*s\s*t\s*i\s*c\s*o\s*p\s*t\s*i\s*o\s*n/i,
+			/d\s*a\s*t\s*a\s*m\s*a\s*x/i,
 			/f\s*r\s*a\s*g\s*d\s*a\s*t\s*a/i,
-			/v\s*o\s*l\s*u\s*m\s*e/i,
-			/m\s*a\s*t\s*n\s*a\s*m\s*e\s*c\s*o\s*l\s*o\s*r/i,
-			/r\s*e\s*g\s*n\s*a\s*m\s*e/i,
+			/r\s*e\s*p\s*e\s*a\s*t\s*e\s*d\s*c\s*o\s*l\s*l\s*i\s*s\s*i\s*o\s*n\s*s/i,
 			/t\s*i\s*m\s*e\s*r/i,
 			/u\s*s\s*e\s*r\s*d\s*e\s*f\s*i\s*n\s*e\s*d\s*p\s*a\s*r\s*t\s*i\s*c\s*l\s*e/i,
-			/u\s*s\s*e\s*r\s*d\s*e\s*f\s*i\s*n\s*e\s*d\s*p\s*a\s*r\s*t\s*i\s*c\s*l\s*e/i
 		),
 
 		// other configuration sections

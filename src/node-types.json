@@ -47,6 +47,10 @@
           "named": true
         },
         {
+          "type": "tabular_section",
+          "named": true
+        },
+        {
           "type": "tally_section",
           "named": true
         },
@@ -56,6 +60,25 @@
         },
         {
           "type": "title_section",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "brace_group",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "string",
           "named": true
         }
       ]
@@ -312,6 +335,71 @@
         },
         {
           "type": "time_unit",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "data_cell",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "brace_group",
+          "named": true
+        },
+        {
+          "type": "data_group",
+          "named": true
+        },
+        {
+          "type": "math_expression",
+          "named": true
+        },
+        {
+          "type": "string",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "data_group",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "data_group_item",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "data_group_item",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "brace_group",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "string",
           "named": true
         }
       ]
@@ -1404,6 +1492,141 @@
     }
   },
   {
+    "type": "tabular_parameter",
+    "named": true,
+    "fields": {
+      "field": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "string",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expressions",
+          "named": true
+        },
+        {
+          "type": "inline_comment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "tabular_row",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "data_cell",
+          "named": true
+        },
+        {
+          "type": "inline_comment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "tabular_section",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "tabular_section_body",
+          "named": true
+        },
+        {
+          "type": "tabular_section_header",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "tabular_section_body",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "comment",
+          "named": true
+        },
+        {
+          "type": "insert_file_statement",
+          "named": true
+        },
+        {
+          "type": "skip_section_statement",
+          "named": true
+        },
+        {
+          "type": "tabular_parameter",
+          "named": true
+        },
+        {
+          "type": "tabular_row",
+          "named": true
+        },
+        {
+          "type": "termination_statement",
+          "named": true
+        },
+        {
+          "type": "user_definition",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "tabular_section_header",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "inline_comment",
+          "named": true
+        },
+        {
+          "type": "section_option",
+          "named": true
+        },
+        {
+          "type": "tabular_section_name",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "tabular_section_name",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "tally_section",
     "named": true,
     "fields": {},
@@ -1703,7 +1926,15 @@
     "named": false
   },
   {
+    "type": "<",
+    "named": false
+  },
+  {
     "type": "=",
+    "named": false
+  },
+  {
+    "type": ">",
     "named": false
   },
   {

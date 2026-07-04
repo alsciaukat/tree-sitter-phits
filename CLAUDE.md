@@ -50,7 +50,7 @@ A PHITS input file is a sequence of **sections**, each introduced by a bracketed
 
 Top level: `source_file` = optional `preamble` (parameter defs / comments before any section) + `body` (the sections). Each section rule follows the same shape: `<section>_header` + optional `<section>_body`, where the body is a `repeat1(choice(...))` of the statement kinds legal in that section.
 
-Section dispatch is **precedence-ordered by declaration position**. `data_section` and `other_section` have broad header regexes and must stay *last* among the section choices so specific sections (title/parameter/material/surface/cell/tally) win — there is a comment marking this; do not reorder them.
+Section dispatch is **precedence-ordered by declaration position**. `data_section` and `other_section` have broad header regexes and must stay *last* among the section choices so specific sections (title/parameter/material/surface/cell/tally/tabular) win — there is a comment marking this; do not reorder them.
 
 Distinct sub-grammars worth knowing:
 
@@ -58,6 +58,7 @@ Distinct sub-grammars worth knowing:
 - **Surface** (`surface_definition`): `number [transform] symbol params...`, one per line. Params are `math_expression`s.
 - **Cell** (`cell_definition` + `surface_expression`): MCNP-style constructive solid geometry. Space = intersection (implicit `repeat1`), `:` = union (`or_surface_expression`), `#` = complement (`not_surface_expression`), parentheses group. `cell_properties` handle `key=value` attributes and `fill=`/lattice universe lists. Geometry continues on indented (`{6,}` spaces) `continued_cell_definition` lines.
 - **Parameter / tally** bodies: `field = expressions` statements, with `extended_parameter_definition` = a definition plus `continued_statement` follow-on lines (e.g. `[T-Dchain]` `timeevo`/`outtime` rows carrying a `time_unit`).
+- **Tabular** (`tabular_section`): the region-/material-/particle-keyed *tables* (`[Volume]`, `[Weight Window]`, `[Forced Collisions]`, `[Importance]`, …). Shared shape = optional `key = value` `tabular_parameter` lines + a column-header row + data rows (`tabular_row` → `data_cell`s). Column semantics are intentionally generic. Region keys may be ranges/lattice specifiers (`brace_group` `{ 4 - 7 }`, `data_group` `( 6<10[1 0 0]<u=3 )`). The structurally-different (`[Transform]`, `[Magnetic Field]`, …) and nuclide-bearing (`[Data Max]`, `[Frag Data]`, `[Repeated Collisions]`) sections stay on `data_section`'s generic line body — digit-leading nuclide cells (`12C`, `208Pb`) collide with scientific-notation tokenization.
 - Directives usable in most bodies: `infl:` (insert file), `set:` (user-defined constants), `qp:` (skip), `q:` (terminate). `[end]` is the file `terminator`.
 
 ### Rule reference
@@ -68,7 +69,7 @@ Detailed map of the rules in `grammar.js`. **Field names and node names are a co
 
 - `source_file` → optional `preamble` + optional `body`.
 - `preamble` → `repeat1(parameter_definition | comment)`, plus an optional trailing `_parameter_statement` aliased to `parameter_definition` (EOF-without-newline handling; see below). This is the region before the first `[section]`.
-- `body` → `repeat1` of the section choices **in this fixed order**: `title_section`, `parameter_section`, `material_section`, `surface_section`, `cell_section`, `tally_section`, `data_section`, `other_section`, `terminator`. Order = precedence; `data_section`/`other_section` are broad and must stay last.
+- `body` → `repeat1` of the section choices **in this fixed order**: `title_section`, `parameter_section`, `material_section`, `surface_section`, `cell_section`, `tally_section`, `tabular_section`, `data_section`, `other_section`, `terminator`. Order = precedence; `data_section`/`other_section` are broad and must stay last.
 
 **Common header shape**: `'[' <name-regex> ']'` + optional `section_option` + optional `inline_comment`. `section_option` is `repeat1(string)`. The **material header additionally ends with an explicit `'\n'`** (stops `section_option` from swallowing the first `m<N>` material line as a string).
 
@@ -82,7 +83,8 @@ Detailed map of the rules in `grammar.js`. **Field names and node names are a co
 | `material_section` | `[material]` | see Material below (a `choice` of normal vs reverse layout) |
 | `surface_section` | `[surface]` | `surface_definition`, directives, `c_comment` |
 | `cell_section` | `[cell]` | `cell_definition`, `continued_cell_definition`, `extended_cell_definition`, directives, `c_comment` |
-| `data_section` | fixed `data_section_name` list (transform, temperature, mat-time-change, magnetic-field, delta-ray, volume, timer, …) | `line` \| `comment` \| `'\n'` (contents TODO) |
+| `tabular_section` | fixed `tabular_section_name` list (volume, temperature, mat-time-change, elastic-option, super-mirror, importance, weight-window, ww-bias, forced-collisions, multiplier, counter, reg-name, mat-name-color) | `tabular_parameter`, `tabular_row`, directives, `comment` |
+| `data_section` | fixed `data_section_name` list (transform, magnetic-field, electromagnetic-field, delta-ray, track-structure, data-max, frag-data, repeated-collisions, timer, …) | `line` \| `comment` \| `'\n'` (contents TODO) |
 | `other_section` | catch-all `/\w[\s\w]*\w/` | `line` \| `comment` \| `'\n'` (contents TODO) |
 | `terminator` | `[end]` | — |
 
@@ -109,6 +111,16 @@ Detailed map of the rules in `grammar.js`. **Field names and node names are a co
 - `surface_expression` → `integer` \| `parenthesized_surface_expression` (`( … )`, prec 4) \| `not_surface_expression` (`#expr`, prec 3, complement) \| `or_surface_expression` (`expr : expr`, prec 2, union). Implicit `repeat1` = intersection.
 - `continued_cell_definition` → `/ {6,}/` indent + (`cell_properties+` \| `surface_expression+` \| `number+`) + `'\n'`; `extended_cell_definition` = `cell_definition` + `repeat1(continued_cell_definition)`.
 - `cell_properties` → `repeat1` of `fill = universe_lattice_number+` or `field = number`. `universe_lattice_number` → `index[:index…]`.
+
+**Tabular rules** (shared body for region-/material-/particle-keyed tables)
+
+- `tabular_section` = `tabular_section_header` + optional `tabular_section_body`. Header (like the material header) ends with an explicit `'\n'`. `tabular_section_name` is the fixed list above.
+- `tabular_section_body` → `repeat1(tabular_parameter | tabular_row | directives | comment)`.
+- `tabular_parameter` → `field("field", string) '=' expressions [inline_comment] '\n'` (the `mesh=reg`, `part=neutron`, `eng=2`, `number=-201` lines).
+- `tabular_row` → `repeat1(data_cell)` + optional `inline_comment` + `'\n'`. A row is just a newline-terminated sequence of cells; column meaning is left generic (both header rows like `reg vol` and data rows parse as `tabular_row`).
+- `data_cell` → `math_expression` \| `string` \| `brace_group` \| `data_group`.
+- `brace_group` → `{ … }` over `number | string | '-'` — `{ 4 - 7 }` (region range), `{mat 3}` (name), `{ 0.067 0.600 1.00 }` (RGB colour).
+- `data_group` → `( … )` region/lattice/universe key, e.g. `( { 2 - 5 } 8 9 )`, `( 6<10[1 0 0]<u=3 )`; items are `number | string | brace_group | < > [ ] =`. A GLR `conflicts` entry `[math_expression, data_group_item]` lets a bare `( number )` be either a parenthesised math expression or a single-item group.
 
 **Shared statement rules**
 
