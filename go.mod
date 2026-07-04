@@ -1,4 +1,4 @@
-module github.com/tree-sitter/tree-sitter-phits
+module github.com/alsciaukat/tree-sitter-phits
 
 go 1.22
 
